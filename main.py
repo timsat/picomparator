@@ -30,12 +30,17 @@ class MyFrame(wx.Frame):
         font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         font.SetPointSize(10)
         font.SetFaceName("Liberation Mono")
-        filelist = wx.ListBox(self, size=(700,500))
-        filelist.InsertItems(files, 0)
-        filelist.SetFont(font)
-        filelist.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemClicked)
-        hbox.Add(filelist, flag=wx.EXPAND | wx.ALL)
+        self.filelist = wx.ListBox(self, size=(700,500))
+        self.filelist.InsertItems(files, 0)
+        self.filelist.SetFont(font)
+        self.filelist.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemClicked)
+        self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
+        hbox.Add(self.filelist, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
+        self.CreateStatusBar(1)
+        self.SetStatusText("test status")
+        # self.statusbar = wx.StatusBar(self)
+        # self.statusbar.SetFieldsCount()
 
 
     def onItemClicked(self, event):
@@ -60,6 +65,9 @@ class MyFrame(wx.Frame):
         time.sleep(0.1)
         self.process3 = subprocess.Popen(["feh", "-d.", self.diff_dir + "/" + event.GetString()])
 
+
+    def onItemSelected(self, event):
+        self.SetStatusText(str(event.GetSelection()+3))
 
 import argparse
 import os.path
@@ -121,7 +129,8 @@ if args.file_list is not None:
 else:
     os.path.walk(args.new_dir, visit_dir, (new_files, ".png"))
     os.path.walk(args.old_dir, visit_dir, (old_files, ".png"))
-    os.path.walk(args.diffs_dir, visit_diffs, (diff_files, ".png"))
+
+os.path.walk(args.diffs_dir, visit_diffs, (diff_files, ".png"))
 
 for k,v in new_files.items():
     diff_path = args.diffs_dir + "/" + k
