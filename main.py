@@ -79,6 +79,28 @@ def visit_diffs(arg, dirname, names):
             strip_index=string.index(filepath, "/", 1)+1
             arg[0].append(filepath[strip_index:])
 
+new_files={}
+old_files={}
+diff_files=[]
+
+def convert(filename, dir, files_map):
+    print "processing " + filename
+    full_path =  dir + "/" + filename
+    strip_index=string.index(full_path, "/", 1)+1
+    k = full_path[strip_index:] + ".png"
+    full_path_png = full_path + ".png"
+
+    if os.path.exists(full_path_png) or subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", full_path, full_path_png]) == 0:
+        files_map[k] = full_path_png
+    else:
+        print "error converting " + full_path
+
+'''
+def chunks(l, n):
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+'''
+
 parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
 parser.add_argument("new_dir", help="directory with new images")
 parser.add_argument("old_dir", help="second with old images")
@@ -86,35 +108,20 @@ parser.add_argument("diffs_dir", default="diffs", help="resulting directory")
 parser.add_argument("--file_list", default=None, help="file with list of images to compare", )
 args = parser.parse_args()
 
-new_files={}
-old_files={}
-diff_files=[]
-
 
 if args.file_list is not None:
+    files = None
     with open(args.file_list, 'r') as f:
-        for l in f:
-            print "processing " + l
-            full_new_path =  args.new_dir + "/" + l.strip("\n")[:-4]
-            full_old_path =  args.old_dir + "/" + l.strip("\n")[:-4]
-            strip_index=string.index(full_new_path, "/", 1)+1
-            k = full_new_path[strip_index:] + ".png"
+        files = map(lambda x: x.strip("\n")[:-4], list(f))
 
-            if subprocess.call(["convert", "-density", "170", full_new_path, full_new_path + ".png"]) != 0:
-                print "error converting " + full_new_path
-            else:
-                new_files[k] = full_new_path + ".png"
-
-            if subprocess.call(["convert", "-density", "170", full_old_path, full_old_path + ".png"]) != 0:
-                print "error converting " + full_old_path
-            else:
-                old_files[k] = full_old_path + ".png"
+    for l in files:
+        print "processing " + l
+        convert(l, args.new_dir, new_files)
+        convert(l, args.old_dir, old_files)
 else:
     os.path.walk(args.new_dir, visit_dir, (new_files, ".png"))
     os.path.walk(args.old_dir, visit_dir, (old_files, ".png"))
     os.path.walk(args.diffs_dir, visit_diffs, (diff_files, ".png"))
-
-print old_files
 
 for k,v in new_files.items():
     diff_path = args.diffs_dir + "/" + k
@@ -123,7 +130,7 @@ for k,v in new_files.items():
         diff_dir = os.path.split(diff_path)[0]
         if not os.path.exists(diff_dir):
             os.makedirs(diff_dir)
-        if subprocess.call(["compare", v, old_files[k], diff_path]) != 0:
+        if subprocess.call(["compare", "-limit", "thread", "2", v, old_files[k], diff_path]) != 0:
             open(diff_path, 'a').close()
 
 
