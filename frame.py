@@ -37,7 +37,7 @@ class MyFrame(wx.Frame):
         self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
         hbox.Add(self.filelist, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
-        self.CreateStatusBar(1)
+        self.CreateStatusBar(3)
         self.SetStatusText("test status")
         # self.statusbar = wx.StatusBar(self)
         # self.statusbar.SetFieldsCount()
@@ -73,5 +73,8 @@ class MyFrame(wx.Frame):
 
 
     def onItemSelected(self, event):
-        self.SetStatusText(str(event.GetSelection()+3))
+        doc = self.docMap[event.GetString()]
+        self.SetStatusText(str(event.GetSelection()+3), 0)
+        self.SetStatusText("processed" if doc.isCompared() else "not processed", 1)
+        self.SetStatusText(doc.id(), 2)
 

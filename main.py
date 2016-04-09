@@ -80,33 +80,28 @@ Document.initDirs(args.new_dir, args.old_dir, "_picache")
 
 docsMap={}
 docKeys=[]
-normalQueue = Queue.Queue()
-priorityQueue = Queue.Queue()
+convertQueue = Queue.Queue()
 
-def worker():
-    while not normalQueue.empty():
-        if not priorityQueue.empty():
-            queue = priorityQueue
-        else:
-            queue = normalQueue
 
-        task = queue.get()
-        if not task.doc.isCompared():
-            srcs = task.doc.srcFiles()
-            imgs = task.doc.imgFiles()
+def ensureDocCompared(doc):
+    with doc.lock:
+        if not doc.isCompared():
+            srcs = doc.srcFiles()
+            imgs = doc.imgFiles()
             convert(srcs[0], imgs[0])
             convert(srcs[1], imgs[1])
             compare(imgs[0], imgs[1], imgs[2])
-        queue.task_done()
 
-def handler(frame, doc):
-    if not doc.isCompared():
-        srcs = doc.srcFiles()
-        imgs = doc.imgFiles()
-        convert(srcs[0], imgs[0])
-        convert(srcs[1], imgs[1])
-        compare(imgs[0], imgs[1], imgs[2])
 
+def worker():
+    while not convertQueue.empty():
+        task = convertQueue.get()
+        ensureDocCompared(task.doc)
+        convertQueue.task_done()
+
+
+def dclick_handler(frame, doc):
+    ensureDocCompared(doc)
     frame.show(doc)
 
 
@@ -118,7 +113,7 @@ for l in files:
     doc = Document(l)
     docsMap[l] = doc
     docKeys.append(l)
-    normalQueue.put(Task(doc))
+    convertQueue.put(Task(doc))
 
 if len(docKeys) > 0:
     if not os.path.exists(Document.cacheDir):
@@ -129,6 +124,6 @@ if len(docKeys) > 0:
 
     print "Starting image browser"
     app = wx.App(False)
-    frame = MyFrame(None, "Files", docKeys, docsMap, handler)
+    frame = MyFrame(None, "Files", docKeys, docsMap, dclick_handler)
     app.MainLoop()
 
