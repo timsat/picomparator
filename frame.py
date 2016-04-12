@@ -38,7 +38,7 @@ class MyFrame(wx.Frame):
         hbox.Add(self.filelist, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
         self.CreateStatusBar(3)
-        self.SetStatusText("test status")
+        self.SetStatusWidths([100,150,350])
         # self.statusbar = wx.StatusBar(self)
         # self.statusbar.SetFieldsCount()
 

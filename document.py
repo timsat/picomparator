@@ -6,8 +6,8 @@ import threading
 
 class Document:
 
-    newDir=""
-    oldDir=""
+    afterDir=""
+    beforeDir=""
     cacheDir=""
 
 
@@ -17,9 +17,9 @@ class Document:
 
 
     @classmethod
-    def initDirs(cls, newDir, oldDir, cacheDir ):
-        cls.newDir = newDir
-        cls.oldDir = oldDir
+    def initDirs(cls, afterDir, beforeDir, cacheDir ):
+        cls.afterDir = afterDir
+        cls.beforeDir = beforeDir
         cls.cacheDir = cacheDir
 
 
@@ -29,8 +29,8 @@ class Document:
 
 
     def srcFiles(self):
-        newSrc = Document.newDir + "/" + self.key
-        oldSrc = Document.oldDir + "/" + self.key
+        newSrc = Document.afterDir + "/" + self.key
+        oldSrc = Document.beforeDir + "/" + self.key
         return (newSrc, oldSrc)
 
     def id(self):

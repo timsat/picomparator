@@ -22,27 +22,6 @@ class Task:
         self.doc = doc
         # self.priority = priority
 
-'''
-    def __eq__(self, other):
-        """
-        :type other: Task
-        :return:
-        """
-        return self.doc.key == other.doc.key
-
-    def __cmp__(self, other):
-        """
-        :type other: Task
-        :return:
-        """
-        if self.__eq__(other):
-            return 0
-        if self.priority == other.priority:
-            raise Exception("illegal state")
-
-        return self.priority - other.priority
-'''
-
 
 def visit_dir(arg, dirname, names):
     for fn in names:
@@ -69,19 +48,6 @@ def compare(imgFile1, imgFile2, diffFile):
     if subprocess.call(["compare", "-limit", "thread", "2", imgFile1, imgFile2, diffFile]) != 0:
         open(diffFile, 'a').close()
 
-parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
-parser.add_argument("new_dir", help="directory with new images")
-parser.add_argument("old_dir", help="second with old images")
-#parser.add_argument("diffs_dir", default="diffs", help="resulting directory")
-parser.add_argument("--file_list", default=None, help="file with list of images to compare", )
-args = parser.parse_args()
-
-Document.initDirs(args.new_dir, args.old_dir, "_picache")
-
-docsMap={}
-docKeys=[]
-convertQueue = Queue.Queue()
-
 
 def ensureDocCompared(doc):
     with doc.lock:
@@ -103,6 +69,21 @@ def worker():
 def dclick_handler(frame, doc):
     ensureDocCompared(doc)
     frame.show(doc)
+
+
+parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
+parser.add_argument("after_dir", help="directory with images after the tested change")
+parser.add_argument("before_dir", help="second with images before the tested change")
+#parser.add_argument("diffs_dir", default="diffs", help="resulting directory")
+parser.add_argument("--file_list", default=None, help="file with list of images to compare", )
+args = parser.parse_args()
+
+Document.initDirs(args.after_dir, args.before_dir, "_picache")
+
+docsMap={}
+docKeys=[]
+convertQueue = Queue.Queue()
+
 
 
 files = None
