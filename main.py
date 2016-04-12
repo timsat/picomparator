@@ -41,7 +41,7 @@ def visit_diffs(arg, dirname, names):
 
 def convert(srcFile, imgFile):
     if (not os.path.exists(imgFile)) and subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", srcFile, imgFile]) != 0:
-        print "error converting " + srcFile + " to " + imgFile
+        print("error converting " + srcFile + " to " + imgFile)
 
 
 def compare(imgFile1, imgFile2, diffFile):
@@ -103,7 +103,7 @@ if len(docKeys) > 0:
     t.daemon = True
     t.start()
 
-    print "Starting image browser"
+    print("Starting image browser")
     app = wx.App(False)
     frame = MyFrame(None, "Files", docKeys, docsMap, dclick_handler)
     app.MainLoop()

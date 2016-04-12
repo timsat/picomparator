@@ -3,7 +3,6 @@
 import wx
 import time
 import subprocess
-import document
 
 
 def _kill_proc(process):
@@ -26,21 +25,19 @@ class MyFrame(wx.Frame):
 
 
     def InitUI(self, names):
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        vbox = wx.BoxSizer(wx.VERTICAL)
         font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         font.SetPointSize(10)
         font.SetFaceName("Liberation Mono")
-        self.filelist = wx.ListBox(self, size=(700,500))
+        self.filelist = wx.ListBox(self, size=(-1, -1), pos=(-1, -1))
         self.filelist.InsertItems(names, 0)
         self.filelist.SetFont(font)
         self.filelist.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemClicked)
         self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
-        hbox.Add(self.filelist, flag=wx.EXPAND | wx.ALL)
-        self.SetSizer(hbox)
+        vbox.Add(self.filelist, proportion=1, flag=wx.EXPAND | wx.ALL)
+        self.SetSizer(vbox)
         self.CreateStatusBar(3)
         self.SetStatusWidths([100,150,350])
-        # self.statusbar = wx.StatusBar(self)
-        # self.statusbar.SetFieldsCount()
 
 
     def onItemClicked(self, event):
