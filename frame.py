@@ -3,6 +3,7 @@
 import wx
 import time
 import subprocess
+from diffviewer import DiffViewer
 
 
 def _kill_proc(process):
@@ -12,7 +13,6 @@ def _kill_proc(process):
         pass
 
 class MyFrame(wx.Frame):
-    """ We simply derive a new class of Frame. """
     def __init__(self, parent, title, names, docMap, clickHandler):
         wx.Frame.__init__(self, parent, title=title)
         self.InitUI(names)
@@ -60,6 +60,8 @@ class MyFrame(wx.Frame):
 
 
         imgs = doc.imgFiles()
+
+        df = DiffViewer(self, "diffViewer", imgs[2], imgs[0], imgs[1])
 
         time.sleep(0.1)
         self.process1 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[0]])
