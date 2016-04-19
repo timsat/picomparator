@@ -10,7 +10,9 @@ def mul(point, mult):
 
 
 class ImagePanel(wx.Panel):
-    def __init__(self, parent):
+    __labelPos = (10, 10)
+
+    def __init__(self, parent, label):
         wx.Panel.__init__(self, parent)
         self.doc_bm = None
         """@type : wx.Bitmap"""
@@ -19,6 +21,8 @@ class ImagePanel(wx.Panel):
         self.mdc = None
         """@type : wx.MemoryDC"""
         self.scale = -1.0
+        self.label = label
+        self.offset = wx.Point()
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.Bind(wx.EVT_MOTION, self.onMousemove)
         self.Bind(wx.EVT_LEFT_DOWN, self.onMousedown)
@@ -28,10 +32,10 @@ class ImagePanel(wx.Panel):
         self.startPos = None
         """@type : wx.Point"""
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.offset = wx.Point()
 
     def load(self, filename):
         self.doc_bm = wx.Bitmap(filename)
+        self.offset = wx.Point()
         if self.scale < 0:
             self.setScale(1)
 
@@ -43,6 +47,7 @@ class ImagePanel(wx.Panel):
         self.mdc = wx.MemoryDC(self.doc_scaled_bm)
         tdc = wx.MemoryDC(self.doc_bm)
         self.mdc.StretchBlit(0, 0, sw, sh, tdc, 0, 0, bw, bh)
+        self.Refresh()
 
     def translate(self, point):
         """
@@ -61,12 +66,12 @@ class ImagePanel(wx.Panel):
         dx, dy = self.offset.Get()
         ddx, ddy = 0, 0
         if w > sw:
-            dx = 0
-            ddx = (w - sw) / 2
+            # dx = 0
+            # ddx = (w - sw) / 2
             w = sw
         if h > sh:
-            dy = 0
-            ddy = (h - sh) / 2
+            # dy = 0
+            # ddy = (h - sh) / 2
             h = sh
         return dx, dy, ddx, ddy, w, h
 
@@ -105,4 +110,10 @@ class ImagePanel(wx.Panel):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
         dc.DrawRectangle(0, 0, w, h)
+        lx, ly = ImagePanel.__labelPos
+        lw, lh = dc.GetTextExtent(self.label)
+        dc.SetBrush(wx.Brush(wx.Colour(255, 155, 155, 200)))
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.DrawRectangle(lx, ly, lw+2, lh+2)
+        dc.DrawText(self.label, lx+1, ly+1)
 

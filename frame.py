@@ -4,12 +4,6 @@ import wx
 from diffviewer import DiffViewer
 
 
-def _kill_proc(process):
-    try:
-        process.terminate()
-    except Exception:
-        pass
-
 class MyFrame(wx.Frame):
     def __init__(self, parent, title, names, docMap, clickHandler):
         wx.Frame.__init__(self, parent, title=title)
@@ -17,10 +11,6 @@ class MyFrame(wx.Frame):
         self.clickHandler = clickHandler
         self.docMap = docMap
         self.Show(True)
-        self.process1 = None
-        self.process2 = None
-        self.process3 = None
-
 
     def InitUI(self, names):
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -38,37 +28,12 @@ class MyFrame(wx.Frame):
         self.CreateStatusBar(4)
         self.SetStatusWidths([55, 100, 350, 70])
 
-
     def onItemClicked(self, event):
         self.clickHandler(self, self.docMap[event.GetString()])
 
     def show(self, doc):
-        if self.process1 is not None:
-            _kill_proc(self.process1)
-        if self.process2 is not None:
-            _kill_proc(self.process2)
-        if self.process3 is not None:
-            _kill_proc(self.process3)
-
-        if self.process1 is not None:
-            self.process1.wait()
-        if self.process2 is not None:
-            self.process2.wait()
-        if self.process3 is not None:
-            self.process3.wait()
-
-
         imgs = doc.imgFiles()
-
-        self.diffviewer.load(imgs[2], imgs[0], imgs[1])
-
-        # time.sleep(0.1)
-        # self.process1 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[0]])
-        # time.sleep(0.1)
-        # self.process2 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[1]])
-        # time.sleep(0.1)
-        # self.process3 = subprocess.Popen(["feh", "-d.", imgs[2]])
-
+        self.diffviewer.load(imgs[2], imgs[1], imgs[0])
 
     def onItemSelected(self, event):
         doc = self.docMap[event.GetString()]
@@ -76,4 +41,7 @@ class MyFrame(wx.Frame):
         self.SetStatusText("processed" if doc.isCompared() else "not processed", 1)
         self.SetStatusText(doc.id(), 2)
         self.SetStatusText(str(doc.diff), 3)
+
+    def onKeyUp(self, event):
+        self.diffviewer.onKeyUp(event)
 

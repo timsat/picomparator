@@ -42,7 +42,7 @@ class Document:
 
     def imgFiles(self):
         id = self.id()
-        newImage  = Document.cacheDir + "/" + id + "_after" + ".png"
-        oldImage  = Document.cacheDir + "/" + id + "_before" + ".png"
+        afterImage  = Document.cacheDir + "/" + id + "_after" + ".png"
+        beforeImage  = Document.cacheDir + "/" + id + "_before" + ".png"
         diffImage = Document.cacheDir + "/" + id + ".png"
-        return (newImage, oldImage, diffImage)
+        return (afterImage, beforeImage, diffImage)

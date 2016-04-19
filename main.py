@@ -7,6 +7,7 @@ import argparse
 import os.path
 import string
 import wx
+import shutil
 from threading import Thread
 from frame import MyFrame
 from document import Document
@@ -45,8 +46,7 @@ def convert(srcFile, imgFile):
         if (not os.path.exists(imgFile)) and subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", srcFile, imgFile]) != 0:
             print("error converting " + srcFile + " to " + imgFile)
     else:
-        if subprocess.call(["mv", srcFile + '.png', imgFile]) != 0:
-            print("error moving img from " + srcFile + " to " + imgFile)
+        shutil.move(srcFile + '.png', imgFile)
 
 
 def compare(imgFile1, imgFile2, diffFile):
@@ -123,5 +123,6 @@ if len(docKeys) > 0:
     print("Starting image browser")
     app = wx.App(False)
     frame = MyFrame(None, "Files", docKeys, docsMap, dclick_handler)
+    app.Bind(wx.EVT_KEY_UP, frame.onKeyUp)
     app.MainLoop()
 
