@@ -42,11 +42,12 @@ class ImagePanel(wx.Panel):
     def setScale(self, scale):
         self.scale = float(scale)
         bw, bh = self.doc_bm.GetSize()
+        img = self.doc_bm.ConvertToImage()
+        """@type : wx.Image"""
         sw, sh = int(bw * self.scale), int(bh * self.scale)
-        self.doc_scaled_bm = wx.EmptyBitmap(sw, sh)
+        img.Rescale(sw, sh)
+        self.doc_scaled_bm = wx.BitmapFromImage(img)
         self.mdc = wx.MemoryDC(self.doc_scaled_bm)
-        tdc = wx.MemoryDC(self.doc_bm)
-        self.mdc.StretchBlit(0, 0, sw, sh, tdc, 0, 0, bw, bh)
         self.Refresh()
 
     def translate(self, point):
@@ -65,14 +66,14 @@ class ImagePanel(wx.Panel):
 
         dx, dy = self.offset.Get()
         ddx, ddy = 0, 0
-        if w > sw:
+        # if w > sw:
             # dx = 0
             # ddx = (w - sw) / 2
-            w = sw
-        if h > sh:
+            # w = sw
+        # if h > sh:
             # dy = 0
             # ddy = (h - sh) / 2
-            h = sh
+            # h = sh
         return dx, dy, ddx, ddy, w, h
 
     def moveCenterPoint(self, point):
@@ -102,7 +103,7 @@ class ImagePanel(wx.Panel):
             self.Refresh()
 
     def onPaint(self, event):
-        dc = wx.GCDC(self)
+        dc = wx.PaintDC(self)
         mdc = self.mdc
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
