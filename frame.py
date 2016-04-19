@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import time
-import subprocess
 from diffviewer import DiffViewer
 
 
@@ -29,6 +27,7 @@ class MyFrame(wx.Frame):
         font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         font.SetPointSize(10)
         font.SetFaceName("Liberation Mono")
+        self.diffviewer = DiffViewer(self, "diffViewer")
         self.filelist = wx.ListBox(self, size=(-1, -1), pos=(-1, -1))
         self.filelist.InsertItems(names, 0)
         self.filelist.SetFont(font)
@@ -61,7 +60,7 @@ class MyFrame(wx.Frame):
 
         imgs = doc.imgFiles()
 
-        df = DiffViewer(self, "diffViewer", imgs[2], imgs[0], imgs[1])
+        self.diffviewer.load(imgs[2], imgs[0], imgs[1])
 
         # time.sleep(0.1)
         # self.process1 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[0]])

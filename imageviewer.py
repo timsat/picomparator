@@ -70,6 +70,14 @@ class ImagePanel(wx.Panel):
             h = sh
         return dx, dy, ddx, ddy, w, h
 
+    def moveCenterPoint(self, point):
+        cw, ch = self.GetClientSize()
+        dx, dy, ddx, ddy, w, h = self.getPaintParams()
+        do = wx.Point(ddx, ddy)
+        center = wx.Point(cw/2, ch/2)
+        self.offset = mul(point, self.scale) - center + do
+        self.Refresh()
+
     def onMousedown(self, event):
         self.startPos = event.GetPosition() + self.offset
 
@@ -94,11 +102,7 @@ class ImagePanel(wx.Panel):
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
         dc.Blit(ddx, ddy, w, h, mdc, dx, dy)
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
+        dc.DrawRectangle(0, 0, w, h)
 
-    def moveCenterPoint(self, point):
-        cw, ch = self.GetClientSize()
-        dx, dy, ddx, ddy, w, h = self.getPaintParams()
-        do = wx.Point(ddx, ddy)
-        center = wx.Point(cw/2, ch/2)
-        self.offset = mul(point, self.scale) - center + do
-        self.Refresh()

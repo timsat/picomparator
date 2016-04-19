@@ -4,7 +4,7 @@ from functools import partial
 
 
 class DiffViewer(wx.Frame):
-    def __init__(self, parent, title, nameDiff, nameBefore, nameAfter):
+    def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title)
         self.diffview = ImagePanel(self)
         self.diffview.centerPointMovedHandler = partial(self.onDiffViewCenterPointMoved, self)
@@ -12,13 +12,6 @@ class DiffViewer(wx.Frame):
         self.beforeview.centerPointMovedHandler = partial(self.onBeforeViewCenterPointMoved, self)
         self.afterview = ImagePanel(self)
         self.afterview.centerPointMovedHandler = partial(self.onAfterViewCenterPointMoved, self)
-        self.diffview.load(nameDiff)
-        self.afterview.load(nameAfter)
-        self.beforeview.load(nameBefore)
-        scale = 0.5
-        self.diffview.setScale(scale)
-        self.afterview.setScale(scale)
-        self.beforeview.setScale(scale)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(self.beforeview, proportion=1, flag=wx.EXPAND | wx.ALL)
@@ -26,7 +19,17 @@ class DiffViewer(wx.Frame):
         hbox.Add(self.diffview, proportion=1, flag=wx.EXPAND | wx.ALL)
         hbox.Add(vbox, proportion=1, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
+
+    def load(self, nameDiff, nameBefore, nameAfter):
+        self.diffview.load(nameDiff)
+        self.afterview.load(nameAfter)
+        self.beforeview.load(nameBefore)
+        scale = 0.5
+        self.diffview.setScale(scale)
+        self.afterview.setScale(scale)
+        self.beforeview.setScale(scale)
         self.Show(True)
+        self.Refresh()
 
     def zoomIn(self, event):
         pass
