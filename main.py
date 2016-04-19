@@ -11,6 +11,7 @@ from threading import Thread
 from frame import MyFrame
 from document import Document
 import Queue
+import locale
 
 class Task:
     def __init__(self, doc, priority=0):
@@ -40,8 +41,12 @@ def visit_diffs(arg, dirname, names):
 
 
 def convert(srcFile, imgFile):
-    if (not os.path.exists(imgFile)) and subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", srcFile, imgFile]) != 0:
-        print("error converting " + srcFile + " to " + imgFile)
+    if not os.path.exists(srcFile + '.png'):
+        if (not os.path.exists(imgFile)) and subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", srcFile, imgFile]) != 0:
+            print("error converting " + srcFile + " to " + imgFile)
+    else:
+        if subprocess.call(["mv", srcFile + '.png', imgFile]) != 0:
+            print("error moving img from " + srcFile + " to " + imgFile)
 
 
 def compare(imgFile1, imgFile2, diffFile):
@@ -71,6 +76,19 @@ def dclick_handler(frame, doc):
     frame.show(doc)
 
 
+def docFromCsvLine(line):
+    fields = line.split(';')
+    key = fields[0][:-4]
+    diff = locale.atof(fields[1])
+    status = None
+    comment = None
+    if len(fields) > 2:
+        status = fields[2]
+    if len(fields) > 3:
+        comment = fields[3]
+    return Document(key, fields[0], diff, status, comment)
+
+
 parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
 parser.add_argument("after_dir", help="directory with images after the tested change")
 parser.add_argument("before_dir", help="second with images before the tested change")
@@ -78,22 +96,21 @@ parser.add_argument("before_dir", help="second with images before the tested cha
 parser.add_argument("--file_list", default=None, help="file with list of images to compare", )
 args = parser.parse_args()
 
+locale.setlocale(locale.LC_NUMERIC, 'ru_RU.UTF-8')
+
 Document.initDirs(args.after_dir, args.before_dir, "_picache")
 
 docsMap={}
 docKeys=[]
 convertQueue = Queue.Queue()
 
-
-
-files = None
+documents = None
 with open(args.file_list, 'r') as f:
-    files = map(lambda x: x.strip("\n")[:-4], list(f))
+    documents = map(docFromCsvLine, list(f))
 
-for l in files:
-    doc = Document(l)
-    docsMap[l] = doc
-    docKeys.append(l)
+for doc in documents:
+    docsMap[doc.key] = doc
+    docKeys.append(doc.key)
     convertQueue.put(Task(doc))
 
 if len(docKeys) > 0:

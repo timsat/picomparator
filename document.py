@@ -11,8 +11,12 @@ class Document:
     cacheDir=""
 
 
-    def __init__(self, key):
+    def __init__(self, key, originalFile, diff, status=None, comment=None):
         self.key = key
+        self.originalName = originalFile
+        self.diff = diff
+        self.status = status
+        self.comment = comment
         self.lock = threading.Lock()
 
 

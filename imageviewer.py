@@ -1,6 +1,14 @@
 import wx
 
 
+def div(point, divider):
+    return wx.Point(round(point.x / divider), round(point.y / divider))
+
+
+def mul(point, mult):
+    return wx.Point(round(point.x * mult), round(point.y * mult))
+
+
 class ImagePanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
@@ -19,7 +27,7 @@ class ImagePanel(wx.Panel):
         self.centerPointMovedHandler = None
         self.startPos = None
         """@type : wx.Point"""
-        self.SetBackgroundColour(wx.Colour(200,200,200))
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.offset = wx.Point()
 
     def load(self, filename):
@@ -43,7 +51,7 @@ class ImagePanel(wx.Panel):
         """
         x, y = point.Get()
         scale = self.scale
-        point.Set(round(x / scale),round(y / scale))
+        point.Set(round(x / scale), round(y / scale))
         return point
 
     def getPaintParams(self):
@@ -62,7 +70,6 @@ class ImagePanel(wx.Panel):
             h = sh
         return dx, dy, ddx, ddy, w, h
 
-
     def onMousedown(self, event):
         self.startPos = event.GetPosition() + self.offset
 
@@ -74,7 +81,7 @@ class ImagePanel(wx.Panel):
             so = wx.Point(dx, dy)
             do = wx.Point(ddx, ddy)
             center = wx.Point(cw/2, ch/2)
-            self.centerPointMovedHandler((so + center - do)/self.scale)
+            self.centerPointMovedHandler(div(so + center - do, self.scale))
 
     def onMousemove(self, event):
         if self.startPos is not None:
@@ -87,3 +94,11 @@ class ImagePanel(wx.Panel):
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
         dc.Blit(ddx, ddy, w, h, mdc, dx, dy)
+
+    def moveCenterPoint(self, point):
+        cw, ch = self.GetClientSize()
+        dx, dy, ddx, ddy, w, h = self.getPaintParams()
+        do = wx.Point(ddx, ddy)
+        center = wx.Point(cw/2, ch/2)
+        self.offset = mul(point, self.scale) - center + do
+        self.Refresh()

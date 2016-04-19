@@ -36,8 +36,8 @@ class MyFrame(wx.Frame):
         self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
         vbox.Add(self.filelist, proportion=1, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(vbox)
-        self.CreateStatusBar(3)
-        self.SetStatusWidths([100,150,350])
+        self.CreateStatusBar(4)
+        self.SetStatusWidths([55, 100, 350, 70])
 
 
     def onItemClicked(self, event):
@@ -63,12 +63,12 @@ class MyFrame(wx.Frame):
 
         df = DiffViewer(self, "diffViewer", imgs[2], imgs[0], imgs[1])
 
-        time.sleep(0.1)
-        self.process1 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[0]])
-        time.sleep(0.1)
-        self.process2 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[1]])
-        time.sleep(0.1)
-        self.process3 = subprocess.Popen(["feh", "-d.", imgs[2]])
+        # time.sleep(0.1)
+        # self.process1 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[0]])
+        # time.sleep(0.1)
+        # self.process2 = subprocess.Popen(["feh", "-d.", "-B", "white", imgs[1]])
+        # time.sleep(0.1)
+        # self.process3 = subprocess.Popen(["feh", "-d.", imgs[2]])
 
 
     def onItemSelected(self, event):
@@ -76,4 +76,5 @@ class MyFrame(wx.Frame):
         self.SetStatusText(str(event.GetSelection()+3), 0)
         self.SetStatusText("processed" if doc.isCompared() else "not processed", 1)
         self.SetStatusText(doc.id(), 2)
+        self.SetStatusText(str(doc.diff), 3)
 
