@@ -6,12 +6,12 @@ from functools import partial
 class DiffViewer(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title)
-        self.diffview = ImagePanel(self, "Difference")
-        self.diffview.centerPointMovedHandler = partial(self._onDiffViewCenterPointMoved, self)
-        self.beforeview = ImagePanel(self, "Before")
-        self.beforeview.centerPointMovedHandler = partial(self._onBeforeViewCenterPointMoved, self)
         self.afterview = ImagePanel(self, "After")
         self.afterview.centerPointMovedHandler = partial(self._onAfterViewCenterPointMoved, self)
+        self.beforeview = ImagePanel(self, "Before")
+        self.beforeview.centerPointMovedHandler = partial(self._onBeforeViewCenterPointMoved, self)
+        self.diffview = ImagePanel(self, "Difference")
+        self.diffview.centerPointMovedHandler = partial(self._onDiffViewCenterPointMoved, self)
         self.scale = 0.5
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -21,10 +21,10 @@ class DiffViewer(wx.Frame):
         hbox.Add(vbox, proportion=1, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
 
-    def load(self, nameDiff, nameBefore, nameAfter):
-        self.diffview.load(nameDiff)
+    def load(self, nameAfter, nameBefore, nameDiff):
         self.afterview.load(nameAfter)
         self.beforeview.load(nameBefore)
+        self.diffview.load(nameDiff)
         self.setScale(0.5)
         self.Show(True)
         self.Refresh()

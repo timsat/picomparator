@@ -1,7 +1,6 @@
 #!/bin/python2.7
 # -*- coding: utf-8 -*-
 
-
 import subprocess
 import argparse
 import os.path
@@ -64,11 +63,12 @@ def ensureDocCompared(doc):
             compare(imgs[0], imgs[1], imgs[2])
 
 
-def worker():
+def worker(frame):
     while not convertQueue.empty():
         task = convertQueue.get()
         ensureDocCompared(task.doc)
         convertQueue.task_done()
+        wx.CallAfter(frame.RefreshDocList)
 
 
 def dclick_handler(frame, doc):
@@ -78,8 +78,8 @@ def dclick_handler(frame, doc):
 
 def docFromCsvLine(line):
     fields = line.split(';')
-    key = fields[0][:-4]
-    diff = locale.atof(fields[1])
+    key = fields[0].strip('\n ')[:-4]
+    diff = locale.atof(fields[1]) if len(fields) > 1 else 0.0
     status = None
     comment = None
     if len(fields) > 2:
@@ -100,8 +100,6 @@ locale.setlocale(locale.LC_NUMERIC, 'ru_RU.UTF-8')
 
 Document.initDirs(args.after_dir, args.before_dir, "_picache")
 
-docsMap={}
-docKeys=[]
 convertQueue = Queue.Queue()
 
 documents = None
@@ -109,20 +107,18 @@ with open(args.file_list, 'r') as f:
     documents = map(docFromCsvLine, list(f))
 
 for doc in documents:
-    docsMap[doc.key] = doc
-    docKeys.append(doc.key)
     convertQueue.put(Task(doc))
 
-if len(docKeys) > 0:
+if len(documents) > 0:
+    app = wx.App(False)
+    frame = MyFrame(None, "Files", documents, dclick_handler)
     if not os.path.exists(Document.cacheDir):
         os.makedirs(Document.cacheDir)
-    t = Thread(target=worker)
+    t = Thread(target=worker, args=(frame, ))
     t.daemon = True
     t.start()
 
     print("Starting image browser")
-    app = wx.App(False)
-    frame = MyFrame(None, "Files", docKeys, docsMap, dclick_handler)
     app.Bind(wx.EVT_KEY_UP, frame.onKeyUp)
     app.MainLoop()
 

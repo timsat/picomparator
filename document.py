@@ -6,10 +6,16 @@ import threading
 
 class Document:
 
-    afterDir=""
-    beforeDir=""
-    cacheDir=""
+    afterDir = ""
+    beforeDir = ""
+    cacheDir = ""
 
+    IMG_AFTER = 0
+    IMG_BEFORE = 1
+    IMG_DIFF = 2
+
+    SRC_AFTER = 0
+    SRC_BEFORE = 1
 
     def __init__(self, key, originalFile, diff, status=None, comment=None):
         self.key = key
@@ -29,7 +35,7 @@ class Document:
 
     def isCompared(self):
         imgFiles = self.imgFiles()
-        return os.path.exists(imgFiles[2])
+        return os.path.exists(imgFiles[Document.IMG_DIFF])
 
 
     def srcFiles(self):
