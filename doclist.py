@@ -36,10 +36,11 @@ class DocListBox(wx.VListBox):
         doc = self.docs[index]
         """ @type: Document"""
 
-        dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH if not doc.isCompared() else wx.Brush(wx.Colour(125, 125, 125)) )
+        if doc.isCompared():
+            dc.SetPen(wx.TRANSPARENT_PEN)
+            dc.SetBrush(wx.TRANSPARENT_BRUSH if not doc.isCompared() else wx.Brush(wx.Colour(125, 125, 125)) )
+            dc.DrawRectangle(rect.x + 1, rect.y + 2, 5, rect.height - 3)
 
-        dc.DrawRectangle(rect.x + 1, rect.y + 2, 5, rect.height - 3)
         labelRect = wx.Rect(rect.x + 20, rect.y + 2, rect.width - 20, rect.height / 2 - 4)
         commentRect = wx.Rect(labelRect.x, labelRect.y + labelRect.height + 2, labelRect.width, labelRect.height)
 
@@ -49,8 +50,13 @@ class DocListBox(wx.VListBox):
         dc.SetTextForeground(wx.BLACK)
         dc.DrawLabel(doc.key, labelRect)
         dc.SetFont(self.commentFont)
-        dc.SetTextForeground(wx.RED)
-        dc.DrawLabel("not commented", commentRect)
+        if doc.comment is None or len(doc.comment) == 0:
+            dc.SetTextForeground(wx.RED)
+            dc.DrawLabel("not commented", commentRect)
+        else:
+            dc.SetTextForeground(wx.BLUE)
+            dc.DrawLabel(doc.comment, commentRect)
+
 
     def GetItem(self, index):
         return self.docs[index]
