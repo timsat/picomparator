@@ -119,6 +119,6 @@ if len(documents) > 0:
     t.start()
 
     print("Starting image browser")
-    app.Bind(wx.EVT_KEY_UP, frame.onKeyUp)
+    app.Bind(wx.EVT_KEY_DOWN, frame.onKeyDown)
     app.MainLoop()
 

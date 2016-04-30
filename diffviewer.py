@@ -20,6 +20,7 @@ class DiffViewer(wx.Frame):
         hbox.Add(self.diffview, proportion=1, flag=wx.EXPAND | wx.ALL)
         hbox.Add(vbox, proportion=1, flag=wx.EXPAND | wx.ALL)
         self.SetSizer(hbox)
+        self.Bind(wx.EVT_CLOSE, self.onClose)
 
     def load(self, nameAfter, nameBefore, nameDiff):
         self.afterview.load(nameAfter)
@@ -36,6 +37,9 @@ class DiffViewer(wx.Frame):
             self.setScale(self.scale - 0.1)
         else:
             event.Skip()
+
+    def onClose(self, event):
+        self.Show(False)
 
     def setScale(self, scale):
         if scale < 0.1:

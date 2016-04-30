@@ -14,8 +14,8 @@ class ImagePanel(wx.Panel):
 
     def __init__(self, parent, label):
         wx.Panel.__init__(self, parent)
-        self.doc_bm = None
-        """@type : wx.Bitmap"""
+        self.doc_img = None
+        """@type : wx.Image"""
         self.doc_scaled_bm = None
         """@type : wx.Bitmap"""
         self.mdc = None
@@ -34,20 +34,28 @@ class ImagePanel(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
 
     def load(self, filename):
-        self.doc_bm = wx.Bitmap(filename)
+        self.doc_img = wx.Image(filename, wx.BITMAP_TYPE_PNG)
         self.offset = wx.Point()
         if self.scale < 0:
             self.setScale(1)
 
     def setScale(self, scale):
         self.scale = float(scale)
-        bw, bh = self.doc_bm.GetSize()
-        img = self.doc_bm.ConvertToImage()
+        bw, bh = self.doc_img.GetSize()
+        img =self.doc_img.Copy()
         """@type : wx.Image"""
         sw, sh = int(bw * self.scale), int(bh * self.scale)
         img.Rescale(sw, sh)
-        self.doc_scaled_bm = wx.BitmapFromImage(img)
+        self.doc_scaled_bm = wx.EmptyBitmap(sw, sh)
+        doc_scaled_bm = wx.BitmapFromImage(img, 32) if img.HasAlpha() else wx.BitmapFromImage(img)
         self.mdc = wx.MemoryDC(self.doc_scaled_bm)
+        if img.HasAlpha():
+            self.mdc.SetPen(wx.TRANSPARENT_PEN)
+            self.mdc.SetBrush(wx.WHITE_BRUSH)
+            self.mdc.DrawRectangle(0, 0, sw, sh)
+
+        self.mdc.DrawBitmap(doc_scaled_bm, 0, 0, img.HasAlpha())
+
         self.Refresh()
 
     def translate(self, point):

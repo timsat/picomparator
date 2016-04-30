@@ -6,6 +6,9 @@ from document import Document
 from doclist import DocListBox
 from pprint import pprint
 
+KC_j = 74
+KC_k = 75
+
 class MyFrame(wx.Frame):
     def __init__(self, parent, title, docs, clickHandler):
         wx.Frame.__init__(self, parent, title=title)
@@ -15,9 +18,9 @@ class MyFrame(wx.Frame):
 
     def InitUI(self, docs):
         vbox = wx.BoxSizer(wx.VERTICAL)
-        font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
-        font.SetPointSize(10)
-        font.SetFaceName("Liberation Mono")
+        # font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
+        # font.SetPointSize(10)
+        # font.SetFaceName("Liberation Mono")
         self.diffviewer = DiffViewer(self, "diffViewer")
         self.filelist = DocListBox(self, docs)
         # self.filelist.InsertItems(names, 0)
@@ -45,8 +48,26 @@ class MyFrame(wx.Frame):
         self.SetStatusText(doc.id(), 2)
         self.SetStatusText(str(doc.diff), 3)
 
-    def onKeyUp(self, event):
-        self.diffviewer.onKeyUp(event)
+    def onKeyDown(self, event):
+        """
+        :type event: wx.KeyEvent
+        """
+        print(event.GetKeyCode())
+        if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
+            self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
+        elif event.GetKeyCode() == KC_j:
+            fl = self.filelist
+            count = fl.GetItemCount()
+            curIdx = fl.GetSelection()
+            nextIdx = curIdx + 1 if curIdx < count - 1 else count - 1
+            fl.SetSelection(nextIdx)
+        elif event.GetKeyCode() == KC_k:
+            fl = self.filelist
+            curIdx = fl.GetSelection()
+            nextIdx = curIdx - 1 if curIdx > 0 else 0
+            fl.SetSelection(nextIdx)
+        else:
+            self.diffviewer.onKeyUp(event)
 
     def RefreshDocList(self):
         self.filelist.Refresh()
