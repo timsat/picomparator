@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import wx
 from document import Document
 
@@ -12,6 +12,10 @@ class DocListBox(wx.VListBox):
         self.labelFont = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         self.labelFont.SetPointSize(10)
         self.labelFont.SetFaceName("Liberation Mono")
+
+        self.commentFont = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
+        self.commentFont.SetPointSize(9)
+        self.commentFont.SetFaceName("sans")
 
     def OnMeasureItem(self, index):
         return 35
@@ -36,12 +40,17 @@ class DocListBox(wx.VListBox):
         dc.SetBrush(wx.TRANSPARENT_BRUSH if not doc.isCompared() else wx.Brush(wx.Colour(125, 125, 125)) )
 
         dc.DrawRectangle(rect.x + 1, rect.y + 2, 5, rect.height - 3)
-        labelRect = wx.Rect(rect.x + 10, rect.y + 2, rect.width - 10, rect.height / 2 - 4)
+        labelRect = wx.Rect(rect.x + 20, rect.y + 2, rect.width - 20, rect.height / 2 - 4)
+        commentRect = wx.Rect(labelRect.x, labelRect.y + labelRect.height + 2, labelRect.width, labelRect.height)
 
         dc.SetPen(wx.BLACK_PEN)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetFont(self.labelFont)
+        dc.SetTextForeground(wx.BLACK)
         dc.DrawLabel(doc.key, labelRect)
+        dc.SetFont(self.commentFont)
+        dc.SetTextForeground(wx.RED)
+        dc.DrawLabel("not commented", commentRect)
 
     def GetItem(self, index):
         return self.docs[index]

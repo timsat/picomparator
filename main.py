@@ -10,6 +10,7 @@ import shutil
 from threading import Thread
 from frame import MyFrame
 from document import Document
+from settings import *
 import Queue
 import locale
 
@@ -28,8 +29,8 @@ def visit_dir(arg, dirname, names):
     for fn in names:
         filepath = dirname + "/" + fn
         if os.path.isfile(filepath) and os.path.splitext(fn)[1].lower() == arg[1]:
-            strip_index=string.index(filepath, "/", 1)+1
-            arg[0][filepath[strip_index:]]=filepath
+            strip_index = string.index(filepath, "/", 1)+1
+            arg[0][filepath[strip_index:]] = filepath
 
 
 def visit_diffs(arg, dirname, names):
@@ -104,7 +105,7 @@ convertQueue = Queue.Queue()
 
 documents = None
 with open(args.file_list, 'r') as f:
-    documents = map(docFromCsvLine, list(f))
+    documents = map(docFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
 for doc in documents:
     convertQueue.put(Task(doc))

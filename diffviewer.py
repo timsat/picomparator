@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import wx
 from imageviewer import ImagePanel
 from functools import partial
