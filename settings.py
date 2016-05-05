@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-IMAGEMAGICK_PREFIX = ""
+CONVERT_CMD = ["convert", "-density", "170", "-limit", "thread", "2"]
+COMPARE_CMD = ["compare", "-limit", "thread", "2"]

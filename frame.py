@@ -6,8 +6,8 @@ from document import Document
 from doclist import DocListBox
 from pprint import pprint
 
-KC_j = 74
-KC_k = 75
+_KC_j = 74
+_KC_k = 75
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, title, docs, clickHandler):
@@ -36,17 +36,23 @@ class MyFrame(wx.Frame):
         self.clickHandler(self, self.filelist.GetItem(event.GetSelection()))
 
     def show(self, doc):
-        imgs = doc.imgFiles()
-        self.diffviewer.load(imgs[Document.IMG_AFTER],
-                             imgs[Document.IMG_BEFORE],
-                             imgs[Document.IMG_DIFF])
+        """
+        :type doc: Document
+        :return:
+        """
+        self.diffviewer.load(doc.imgAfterFilename(),
+                             doc.imgBeforeFilename(),
+                             doc.imgDiffFilename())
 
     def onItemSelected(self, event):
         doc = self.filelist.GetItem(event.GetSelection())
+        """
+        @type: Document
+        """
         self.SetStatusText(str(event.GetSelection()+3), 0)
         self.SetStatusText("processed" if doc.isCompared() else "not processed", 1)
-        self.SetStatusText(doc.id(), 2)
-        self.SetStatusText(str(doc.diff), 3)
+        self.SetStatusText(doc.id, 2)
+        self.SetStatusText(str(doc.difference), 3)
 
     def onKeyDown(self, event):
         """
@@ -55,13 +61,13 @@ class MyFrame(wx.Frame):
         print(event.GetKeyCode())
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
             self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
-        elif event.GetKeyCode() == KC_j:
+        elif event.GetKeyCode() == _KC_j:
             fl = self.filelist
             count = fl.GetItemCount()
             curIdx = fl.GetSelection()
             nextIdx = curIdx + 1 if curIdx < count - 1 else count - 1
             fl.SetSelection(nextIdx)
-        elif event.GetKeyCode() == KC_k:
+        elif event.GetKeyCode() == _KC_k:
             fl = self.filelist
             curIdx = fl.GetSelection()
             nextIdx = curIdx - 1 if curIdx > 0 else 0

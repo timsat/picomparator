@@ -43,25 +43,27 @@ def visit_diffs(arg, dirname, names):
 
 def convert(srcFile, imgFile):
     if not os.path.exists(srcFile + '.png'):
-        if (not os.path.exists(imgFile)) and subprocess.call(["convert", "-density", "170", "-limit", "thread", "2", srcFile, imgFile]) != 0:
+        if (not os.path.exists(imgFile)) and subprocess.call(CONVERT_CMD + [srcFile, imgFile]) != 0:
             print("error converting " + srcFile + " to " + imgFile)
     else:
-        shutil.move(srcFile + '.png', imgFile)
+        shutil.copy(srcFile + '.png', imgFile)
 
 
 def compare(imgFile1, imgFile2, diffFile):
-    if subprocess.call(["compare", "-limit", "thread", "2", imgFile1, imgFile2, diffFile]) != 0:
+    if subprocess.call(COMPARE_CMD + [imgFile1, imgFile2, diffFile]) != 0:
         open(diffFile, 'a').close()
 
 
 def ensureDocCompared(doc):
+    """
+    :type doc: Document
+    :return:
+    """
     with doc.lock:
         if not doc.isCompared():
-            srcs = doc.srcFiles()
-            imgs = doc.imgFiles()
-            convert(srcs[0], imgs[0])
-            convert(srcs[1], imgs[1])
-            compare(imgs[0], imgs[1], imgs[2])
+            convert(doc.srcAfterFilename(), doc.imgAfterFilename())
+            convert(doc.srcBeforeFilename(), doc.imgBeforeFilename())
+            compare(doc.imgAfterFilename(), doc.imgBeforeFilename(), doc.imgDiffFilename())
 
 
 def worker(frame):
@@ -91,20 +93,19 @@ def docFromCsvLine(line):
 
 
 parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
-parser.add_argument("after_dir", help="directory with images after the tested change")
-parser.add_argument("before_dir", help="second with images before the tested change")
-#parser.add_argument("diffs_dir", default="diffs", help="resulting directory")
-parser.add_argument("--file_list", default=None, help="file with list of images to compare", )
+parser.add_argument("beforedir", help="path to the images before the tested change")
+parser.add_argument("afterdir", help="path to the images after the tested change")
+parser.add_argument("--filelist", default=None, help="file with filenames and differences in CSV format e.g. differences.csv")
 args = parser.parse_args()
 
-locale.setlocale(locale.LC_NUMERIC, 'ru_RU.UTF-8')
+locale.setlocale(locale.LC_NUMERIC, 'ru_RU')
 
-Document.initDirs(args.after_dir, args.before_dir, "_picache")
+Document.initDirs(args.afterdir, args.beforedir, "_picache")
 
 convertQueue = Queue.Queue()
 
 documents = None
-with open(args.file_list, 'r') as f:
+with open(args.filelist, 'r') as f:
     documents = map(docFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
 for doc in documents:

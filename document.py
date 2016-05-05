@@ -20,10 +20,11 @@ class Document:
     def __init__(self, key, originalFile, diff, status=None, comment=None):
         self.key = key
         self.originalName = originalFile
-        self.diff = diff
+        self.difference = diff
         self.status = status
         self.comment = comment
         self.lock = threading.Lock()
+        self.id = hashlib.md5(self.key).hexdigest()
 
 
     @classmethod
@@ -32,23 +33,20 @@ class Document:
         cls.beforeDir = beforeDir
         cls.cacheDir = cacheDir
 
-
     def isCompared(self):
-        imgFiles = self.imgFiles()
-        return os.path.exists(imgFiles[Document.IMG_DIFF])
+        return os.path.exists(self.imgDiffFilename())
 
+    def srcBeforeFilename(self):
+        return Document.beforeDir + "/" + self.key
 
-    def srcFiles(self):
-        newSrc = Document.afterDir + "/" + self.key
-        oldSrc = Document.beforeDir + "/" + self.key
-        return (newSrc, oldSrc)
+    def srcAfterFilename(self):
+        return Document.afterDir + "/" + self.key
 
-    def id(self):
-        return hashlib.md5(self.key).hexdigest()
+    def imgAfterFilename(self):
+        return Document.cacheDir + "/" + self.id + "_after" + ".png"
 
-    def imgFiles(self):
-        id = self.id()
-        afterImage  = Document.cacheDir + "/" + id + "_after" + ".png"
-        beforeImage  = Document.cacheDir + "/" + id + "_before" + ".png"
-        diffImage = Document.cacheDir + "/" + id + ".png"
-        return (afterImage, beforeImage, diffImage)
+    def imgBeforeFilename(self):
+        return Document.cacheDir + "/" + self.id + "_before" + ".png"
+
+    def imgDiffFilename(self):
+        return Document.cacheDir + "/" + self.id + ".png"

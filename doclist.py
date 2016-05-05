@@ -7,6 +7,9 @@ class DocListBox(wx.VListBox):
     def __init__(self, parent, docs):
         super(DocListBox, self).__init__(parent)
         self.docs = docs
+        """
+        @type : Document
+        """
         self.SetItemCount(len(docs))
 
         self.labelFont = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
@@ -56,7 +59,6 @@ class DocListBox(wx.VListBox):
         else:
             dc.SetTextForeground(wx.BLUE)
             dc.DrawLabel(doc.comment, commentRect)
-
 
     def GetItem(self, index):
         return self.docs[index]
