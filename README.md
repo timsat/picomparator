@@ -15,7 +15,7 @@ optional arguments:
   --filelist FILELIST  file with filenames and differences in CSV format e.g.
                        differences.csv
 ```
-`FILELIST` parameters should contain filenames related to `afterdir` or `beforedir`, so please set those parameters correctly, for example like this:
+`FILELIST` parameter should contain filenames related to `afterdir` or `beforedir`, so please set the parameters correctly, for example like this:
 ```
-./picomparator 10.0.0.0001-single-thread/convertedPdfFiles 11.0.0.1009/convertedPdfFiles --filelist differences.csv
+./picomparator 10.0.0.0001/convertedPdfFiles 10.0.0.0002/convertedPdfFiles --filelist differences.csv
 ```
