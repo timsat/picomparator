@@ -9,7 +9,7 @@ import wx
 import shutil
 from threading import Thread
 from frame import MyFrame
-from document import Document
+from docpage import DocPage
 from settings import *
 import Queue
 import locale
@@ -17,7 +17,7 @@ import locale
 class Task:
     def __init__(self, doc, priority=0):
         """
-        :type doc: Document
+        :type doc: DocPage
         :type priority: int
         :return:
         """
@@ -56,7 +56,7 @@ def compare(imgFile1, imgFile2, diffFile):
 
 def ensureDocCompared(doc):
     """
-    :type doc: Document
+    :type doc: DocPage
     :return:
     """
     with doc.lock:
@@ -89,7 +89,7 @@ def docFromCsvLine(line):
         status = fields[2]
     if len(fields) > 3:
         comment = fields[3]
-    return Document(key, fields[0], diff, status, comment)
+    return DocPage(key, fields[0], diff, status, comment)
 
 
 parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
@@ -100,7 +100,7 @@ args = parser.parse_args()
 
 locale.setlocale(locale.LC_NUMERIC, 'ru_RU')
 
-Document.initDirs(args.afterdir, args.beforedir, "_picache")
+DocPage.initDirs(args.afterdir, args.beforedir, "_picache")
 
 convertQueue = Queue.Queue()
 
@@ -114,8 +114,8 @@ for doc in documents:
 if len(documents) > 0:
     app = wx.App(False)
     frame = MyFrame(None, "Files", documents, dclick_handler)
-    if not os.path.exists(Document.cacheDir):
-        os.makedirs(Document.cacheDir)
+    if not os.path.exists(DocPage.cacheDir):
+        os.makedirs(DocPage.cacheDir)
     t = Thread(target=worker, args=(frame, ))
     t.daemon = True
     t.start()

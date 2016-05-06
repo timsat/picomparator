@@ -2,7 +2,7 @@
 
 import wx
 from diffviewer import DiffViewer
-from document import Document
+from docpage import DocPage
 from doclist import DocListBox
 from pprint import pprint
 
@@ -37,7 +37,7 @@ class MyFrame(wx.Frame):
 
     def show(self, doc):
         """
-        :type doc: Document
+        :type doc: DocPage
         :return:
         """
         self.diffviewer.load(doc.imgAfterFilename(),

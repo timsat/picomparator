@@ -4,18 +4,11 @@ import hashlib
 import os
 import threading
 
-class Document:
+class DocPage:
 
     afterDir = ""
     beforeDir = ""
     cacheDir = ""
-
-    IMG_AFTER = 0
-    IMG_BEFORE = 1
-    IMG_DIFF = 2
-
-    SRC_AFTER = 0
-    SRC_BEFORE = 1
 
     def __init__(self, key, originalFile, diff, status=None, comment=None):
         self.key = key
@@ -37,16 +30,16 @@ class Document:
         return os.path.exists(self.imgDiffFilename())
 
     def srcBeforeFilename(self):
-        return Document.beforeDir + "/" + self.key
+        return DocPage.beforeDir + "/" + self.key
 
     def srcAfterFilename(self):
-        return Document.afterDir + "/" + self.key
+        return DocPage.afterDir + "/" + self.key
 
     def imgAfterFilename(self):
-        return Document.cacheDir + "/" + self.id + "_after" + ".png"
+        return DocPage.cacheDir + "/" + self.id + "_after" + ".png"
 
     def imgBeforeFilename(self):
-        return Document.cacheDir + "/" + self.id + "_before" + ".png"
+        return DocPage.cacheDir + "/" + self.id + "_before" + ".png"
 
     def imgDiffFilename(self):
-        return Document.cacheDir + "/" + self.id + ".png"
+        return DocPage.cacheDir + "/" + self.id + ".png"

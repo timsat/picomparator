@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import wx
-from document import Document
+from docpage import DocPage
 
 
 class DocListBox(wx.VListBox):
