@@ -1,18 +1,18 @@
 #!/bin/python2.7
 # -*- coding: utf-8 -*-
 
-import subprocess
 import argparse
 import os.path
 import string
-import wx
-import shutil
 from threading import Thread
-from frame import MyFrame
-from docpage import DocPage
-from settings import *
 import Queue
 import locale
+
+import wx
+
+from frame import MyFrame
+from docpage import DocPage
+
 
 class Task:
     def __init__(self, doc, priority=0):
@@ -41,45 +41,23 @@ def visit_diffs(arg, dirname, names):
             arg[0].append(filepath[strip_index:])
 
 
-def convert(srcFile, imgFile):
-    if not os.path.exists(srcFile + '.png'):
-        if (not os.path.exists(imgFile)) and subprocess.call(CONVERT_CMD + [srcFile, imgFile]) != 0:
-            print("error converting " + srcFile + " to " + imgFile)
-    else:
-        shutil.copy(srcFile + '.png', imgFile)
-
-
-def compare(imgFile1, imgFile2, diffFile):
-    if subprocess.call(COMPARE_CMD + [imgFile1, imgFile2, diffFile]) != 0:
-        open(diffFile, 'a').close()
-
-
-def ensureDocCompared(doc):
-    """
-    :type doc: DocPage
-    :return:
-    """
-    with doc.lock:
-        if not doc.isCompared():
-            convert(doc.srcAfterFilename(), doc.imgAfterFilename())
-            convert(doc.srcBeforeFilename(), doc.imgBeforeFilename())
-            compare(doc.imgAfterFilename(), doc.imgBeforeFilename(), doc.imgDiffFilename())
-
-
 def worker(frame):
     while not convertQueue.empty():
         task = convertQueue.get()
-        ensureDocCompared(task.doc)
+        """
+        @type: Task
+        """
+        task.doc.ensureCompared()
         convertQueue.task_done()
         wx.CallAfter(frame.RefreshDocList)
 
 
 def dclick_handler(frame, doc):
-    ensureDocCompared(doc)
-    frame.show(doc)
+    if doc.ensureCompared():
+        frame.show(doc)
 
 
-def docFromCsvLine(line):
+def docPageFromCsvLine(line):
     fields = line.split(';')
     key = fields[0].strip('\n ')[:-4]
     diff = locale.atof(fields[1]) if len(fields) > 1 else 0.0
@@ -104,16 +82,17 @@ DocPage.initDirs(args.afterdir, args.beforedir, "_picache")
 
 convertQueue = Queue.Queue()
 
-documents = None
+pages = None
 with open(args.filelist, 'r') as f:
-    documents = map(docFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
+    pages = map(docPageFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
-for doc in documents:
-    convertQueue.put(Task(doc))
+for doc in pages:
+    if not doc.isCompared():
+        convertQueue.put(Task(doc))
 
-if len(documents) > 0:
+if len(pages) > 0:
     app = wx.App(False)
-    frame = MyFrame(None, "Files", documents, dclick_handler)
+    frame = MyFrame(None, "Files", pages, dclick_handler)
     if not os.path.exists(DocPage.cacheDir):
         os.makedirs(DocPage.cacheDir)
     t = Thread(target=worker, args=(frame, ))

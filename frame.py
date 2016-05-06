@@ -6,6 +6,7 @@ from docpage import DocPage
 from doclist import DocListBox
 from pprint import pprint
 
+_KC_i = 73
 _KC_j = 74
 _KC_k = 75
 
@@ -61,6 +62,10 @@ class MyFrame(wx.Frame):
         print(event.GetKeyCode())
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
             self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
+        # elif event.GetKeyCode() == wx.WXK_ESCAPE:
+        #     pass
+        # elif event.GetKeyCode() == _KC_i:
+        #     pass
         elif event.GetKeyCode() == _KC_j:
             fl = self.filelist
             count = fl.GetItemCount()
