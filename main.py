@@ -73,7 +73,7 @@ def docPageFromCsvLine(line):
 parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
 parser.add_argument("beforedir", help="path to the images before the tested change")
 parser.add_argument("afterdir", help="path to the images after the tested change")
-parser.add_argument("--filelist", default=None, help="file with filenames and differences in CSV format e.g. differences.csv")
+parser.add_argument("reportfile", help="file with filenames and differences in CSV format e.g. differences.csv")
 args = parser.parse_args()
 
 locale.setlocale(locale.LC_NUMERIC, 'ru_RU')
@@ -83,7 +83,7 @@ DocPage.initDirs(args.afterdir, args.beforedir, "_picache")
 convertQueue = Queue.Queue()
 
 pages = None
-with open(args.filelist, 'r') as f:
+with open(args.reportfile, 'r') as f:
     pages = map(docPageFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
 for doc in pages:

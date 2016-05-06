@@ -5,6 +5,7 @@ from diffviewer import DiffViewer
 from docpage import DocPage
 from doclist import DocListBox
 from pprint import pprint
+from docpageeditdialog import DocPageEditDialog
 
 _KC_i = 73
 _KC_j = 74
@@ -16,16 +17,12 @@ class MyFrame(wx.Frame):
         self.InitUI(docs)
         self.clickHandler = clickHandler
         self.Show(True)
+        self.isEditing = False
 
     def InitUI(self, docs):
         vbox = wx.BoxSizer(wx.VERTICAL)
-        # font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
-        # font.SetPointSize(10)
-        # font.SetFaceName("Liberation Mono")
         self.diffviewer = DiffViewer(self, "diffViewer")
         self.filelist = DocListBox(self, docs)
-        # self.filelist.InsertItems(names, 0)
-        # self.filelist.SetFont(font)
         self.filelist.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemClicked)
         self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
         vbox.Add(self.filelist, proportion=1, flag=wx.EXPAND | wx.ALL)
@@ -62,10 +59,13 @@ class MyFrame(wx.Frame):
         print(event.GetKeyCode())
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
             self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
-        # elif event.GetKeyCode() == wx.WXK_ESCAPE:
-        #     pass
-        # elif event.GetKeyCode() == _KC_i:
-        #     pass
+        elif event.GetKeyCode() == wx.WXK_ESCAPE:
+            pass
+        elif event.GetKeyCode() == _KC_i:
+            self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
+            i = DocPageEditDialog(self, -1, "some title")
+            i.ShowModal()
+            i.Destroy()
         elif event.GetKeyCode() == _KC_j:
             fl = self.filelist
             count = fl.GetItemCount()

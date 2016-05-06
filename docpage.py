@@ -42,7 +42,7 @@ class DocPage:
         self.difference = diff
         self.status = status
         self.comment = comment
-        self.lock = threading.RLock()
+        self._lock = threading.Lock()
         self.id = hashlib.md5(self.key).hexdigest()
 
 
@@ -71,7 +71,7 @@ class DocPage:
         return DocPage.cacheDir + "/" + self.id + ".png"
 
     def ensureCompared(self):
-        with self.lock:
+        with self._lock:
             if not _ensureConverted(self.srcAfterFilename(), self.imgAfterFilename()):
                 return False
             if not _ensureConverted(self.srcBeforeFilename(), self.imgBeforeFilename()):
