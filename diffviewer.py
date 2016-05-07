@@ -4,6 +4,9 @@ from imageviewer import ImagePanel
 from functools import partial
 from docpage import DocPage
 
+import wx.lib.newevent
+
+RequestNextEvent, EVT_REQUEST_NEXT = wx.lib.newevent.NewEvent()
 
 class DiffViewer(wx.Frame):
     def __init__(self, parent, title):
@@ -19,6 +22,9 @@ class DiffViewer(wx.Frame):
         """
         @type: DocPage
         """
+
+        self.lastComment = ""
+        self.lastStatus = ""
 
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -37,9 +43,15 @@ class DiffViewer(wx.Frame):
         self.statusCb.Append("progress")
         self.statusCb.Append("regress")
         self.commentCb = wx.ComboBox(panel, -1, pos=(5, 38), size=(comboBoxesWidth, 28))
-        self.saveBtn = wx.Button(panel, -1, label="Save && next", pos=(comboBoxesWidth + 10, 5), size=(28*4+5, 28*2+5))
-        self.resetBtn = wx.Button(panel, -1, label="Reset", pos=(comboBoxesWidth + 10 + 28*4+5 + 5, 5), size=(28*2+5, 28*2+5))
-        self.saveBtn.Bind(wx.EVT_BUTTON, self.onSave)
+        self.fillLastBtn = wx.Button(panel, -1, label="Fill last", pos=(comboBoxesWidth + 10, 5), size=(28*4+5, 28*2+5))
+        x, y = self.fillLastBtn.GetPositionTuple()
+        w, h = self.fillLastBtn.GetSizeTuple()
+        self.saveAndNextBtn = wx.Button(panel, -1, label="Save && next", pos=(x + w + 5, y), size=(28*4+5, 28*2+5))
+        x, y = self.saveAndNextBtn.GetPositionTuple()
+        w, h = self.saveAndNextBtn.GetSizeTuple()
+        self.resetBtn = wx.Button(panel, -1, label="Reset", pos=(x + w + 5, 5), size=(28*2+5, 28*2+5))
+        self.fillLastBtn.Bind(wx.EVT_BUTTON, self.onFillLast)
+        self.saveAndNextBtn.Bind(wx.EVT_BUTTON, self.onSave)
         self.resetBtn.Bind(wx.EVT_BUTTON, self.onReset)
 
         vbox.Add(panel, flag=wx.EXPAND | wx.ALL)
@@ -78,12 +90,20 @@ class DiffViewer(wx.Frame):
         self.Show(False)
 
     def onSave(self, event):
-        self.doc.update(self.statusCb.GetValue(), self.commentCb.GetValue())
+        self.lastComment = self.commentCb.GetValue()
+        self.lastStatus = self.statusCb.GetValue()
+        self.doc.update(self.lastStatus, self.lastComment)
         self.GetParent().Refresh()
+        evt = RequestNextEvent()
+        wx.PostEvent(self, evt)
 
     def onReset(self, event):
         self.commentCb.SetValue(self.doc.comment if self.doc.hasComment() else "")
         self.statusCb.SetValue(self.doc.status if self.doc.hasStatus() else "")
+
+    def onFillLast(self, event):
+        self.commentCb.SetValue(self.lastComment)
+        self.statusCb.SetValue(self.lastStatus)
 
     def setScale(self, scale):
         if scale < 0.1:

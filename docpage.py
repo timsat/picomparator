@@ -45,7 +45,6 @@ class DocPage:
         self._lock = threading.Lock()
         self.id = hashlib.md5(self.key).hexdigest()
 
-
     @classmethod
     def initDirs(cls, afterDir, beforeDir, cacheDir ):
         cls.afterDir = afterDir
@@ -80,7 +79,7 @@ class DocPage:
                 ec = subprocess.call(COMPARE_CMD + [self.imgAfterFilename(), self.imgBeforeFilename(), self.imgDiffFilename()])
                 if ec != 1:
                     print("errorcode: " + str(ec) + ". Couldn't compare " + self.imgAfterFilename() + " and " + self.imgBeforeFilename())
-                    open(self.imgDiffFilename(), 'a').close()
+                    # open(self.imgDiffFilename(), 'a').close()
                     return False
         return True
 

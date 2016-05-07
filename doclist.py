@@ -42,7 +42,7 @@ class DocListBox(wx.VListBox):
 
         if doc.hasStatus():
             dc.SetPen(wx.TRANSPARENT_PEN)
-            brushColour = wx.Colour(155, 155,155)
+            brushColour = wx.Colour(155, 155, 155)
             if doc.status == "progress":
                 brushColour = wx.Colour(50, 200, 50)
             elif doc.status == "regress":

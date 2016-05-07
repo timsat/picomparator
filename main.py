@@ -52,11 +52,6 @@ def worker(frame):
         wx.CallAfter(frame.RefreshDocList)
 
 
-def dclick_handler(frame, doc):
-    if doc.ensureCompared():
-        frame.show(doc)
-
-
 def docPageFromCsvLine(line):
     fields = line.split(';')
     key = fields[0].strip('\n ')[:-4]
@@ -92,7 +87,7 @@ for doc in pages:
 
 if len(pages) > 0:
     app = wx.App(False)
-    frame = MyFrame(None, "Files", pages, dclick_handler)
+    frame = MyFrame(None, "Files", pages)
     if not os.path.exists(DocPage.cacheDir):
         os.makedirs(DocPage.cacheDir)
     t = Thread(target=worker, args=(frame, ))
