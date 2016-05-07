@@ -77,7 +77,20 @@ class DocPage:
             if not _ensureConverted(self.srcBeforeFilename(), self.imgBeforeFilename()):
                 return False
             if not os.path.exists(self.imgDiffFilename()):
-                if subprocess.call(COMPARE_CMD + [self.imgAfterFilename(), self.imgBeforeFilename(), self.imgDiffFilename()]) != 0:
+                ec = subprocess.call(COMPARE_CMD + [self.imgAfterFilename(), self.imgBeforeFilename(), self.imgDiffFilename()])
+                if ec != 1:
+                    print("errorcode: " + str(ec) + ". Couldn't compare " + self.imgAfterFilename() + " and " + self.imgBeforeFilename())
                     open(self.imgDiffFilename(), 'a').close()
                     return False
         return True
+
+    def hasStatus(self):
+        return (self.status is not None) and (len(self.status) > 0)
+
+    def hasComment(self):
+        return (self.comment is not None) and (len(self.comment) > 0)
+
+    def update(self, status, comment):
+        with self._lock:
+            self.status = status
+            self.comment = comment

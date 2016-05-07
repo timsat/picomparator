@@ -39,18 +39,24 @@ class DocListBox(wx.VListBox):
         doc = self.docs[index]
         """ @type: Document"""
 
-        if doc.isCompared():
+
+        if doc.hasStatus():
             dc.SetPen(wx.TRANSPARENT_PEN)
-            dc.SetBrush(wx.TRANSPARENT_BRUSH if not doc.isCompared() else wx.Brush(wx.Colour(125, 125, 125)) )
+            brushColour = wx.Colour(155, 155,155)
+            if doc.status == "progress":
+                brushColour = wx.Colour(50, 200, 50)
+            elif doc.status == "regress":
+                brushColour = wx.Colour(200, 50, 50)
+            dc.SetBrush(wx.Brush(brushColour))
             dc.DrawRectangle(rect.x + 1, rect.y + 2, 5, rect.height - 3)
 
-        labelRect = wx.Rect(rect.x + 20, rect.y + 2, rect.width - 20, rect.height / 2 - 4)
+        labelRect = wx.Rect(rect.x + 15, rect.y + 2, rect.width - 20, rect.height / 2 - 4)
         commentRect = wx.Rect(labelRect.x, labelRect.y + labelRect.height + 2, labelRect.width, labelRect.height)
 
         dc.SetPen(wx.BLACK_PEN)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetFont(self.labelFont)
-        dc.SetTextForeground(wx.BLACK)
+        dc.SetTextForeground(wx.BLACK if doc.isCompared() else wx.Colour(135, 135, 135))
         dc.DrawLabel(doc.key, labelRect)
         dc.SetFont(self.commentFont)
         if doc.comment is None or len(doc.comment) == 0:

@@ -29,6 +29,7 @@ class MyFrame(wx.Frame):
         self.SetSizer(vbox)
         self.CreateStatusBar(4)
         self.SetStatusWidths([55, 100, 350, 70])
+        self.docPageEditor = DocPageEditDialog(self, -1, "some title", {})
 
     def onItemClicked(self, event):
         self.clickHandler(self, self.filelist.GetItem(event.GetSelection()))
@@ -38,9 +39,7 @@ class MyFrame(wx.Frame):
         :type doc: DocPage
         :return:
         """
-        self.diffviewer.load(doc.imgAfterFilename(),
-                             doc.imgBeforeFilename(),
-                             doc.imgDiffFilename())
+        self.diffviewer.load(doc)
 
     def onItemSelected(self, event):
         doc = self.filelist.GetItem(event.GetSelection())
@@ -57,15 +56,13 @@ class MyFrame(wx.Frame):
         :type event: wx.KeyEvent
         """
         print(event.GetKeyCode())
-        if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
+        if not self.IsActive():
+            event.Skip()
+            return
+        if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER, _KC_i]:
             self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
         elif event.GetKeyCode() == wx.WXK_ESCAPE:
             pass
-        elif event.GetKeyCode() == _KC_i:
-            self.clickHandler(self, self.filelist.GetItem(self.filelist.GetSelection()))
-            i = DocPageEditDialog(self, -1, "some title")
-            i.ShowModal()
-            i.Destroy()
         elif event.GetKeyCode() == _KC_j:
             fl = self.filelist
             count = fl.GetItemCount()
