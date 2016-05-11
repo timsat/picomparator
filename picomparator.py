@@ -62,7 +62,7 @@ def docPageFromCsvLine(line):
     if len(fields) > 2:
         status = fields[2]
     if len(fields) > 3:
-        comment = fields[3]
+        comment = fields[3].decode("utf-8")
     return DocPage(key, fields[0], diff, status, comment)
 
 

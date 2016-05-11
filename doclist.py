@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import wx
 from docpage import DocPage
+from settings import FILENAME_FONT, COMMENT_FONT
 
 
 class DocListBox(wx.VListBox):
@@ -14,11 +15,11 @@ class DocListBox(wx.VListBox):
 
         self.labelFont = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         self.labelFont.SetPointSize(10)
-        self.labelFont.SetFaceName("Liberation Mono")
+        self.labelFont.SetFaceName(FILENAME_FONT)
 
         self.commentFont = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
         self.commentFont.SetPointSize(9)
-        self.commentFont.SetFaceName("sans")
+        self.commentFont.SetFaceName(COMMENT_FONT)
 
     def OnMeasureItem(self, index):
         return 35
@@ -59,7 +60,7 @@ class DocListBox(wx.VListBox):
         dc.SetTextForeground(wx.BLACK if doc.isCompared() else wx.Colour(135, 135, 135))
         dc.DrawLabel(doc.key, labelRect)
         dc.SetFont(self.commentFont)
-        if doc.comment is None or len(doc.comment) == 0:
+        if not doc.hasComment():
             dc.SetTextForeground(wx.RED)
             dc.DrawLabel("not commented", commentRect)
         else:

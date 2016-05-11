@@ -112,8 +112,9 @@ class ImagePanel(wx.Panel):
             self.Refresh()
 
     def onPaint(self, event):
-        dc = wx.GCDC(wx.PaintDC(self))
+        dc = wx.GCDC(wx.BufferedPaintDC(self))
         mdc = self.mdc
+        dc.SetBackground(wx.Brush(wx.Colour(127, 127, 127)))
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
         dc.Blit(ddx, ddy, w, h, mdc, dx, dy)
