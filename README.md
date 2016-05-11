@@ -9,15 +9,28 @@ Image comparer and browser
 
 ## Setup
 Copy `settings.py.win`/`settings.py.linux` to `settings.py`
+
+##### CONVERT_CMD
 ```
 CONVERT_CMD = ["convert", "-density", "170", "-limit", "thread", "2"]
                 ^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                 command           command-line params
 ```
-* `-density` - resolution of PDF->PNG convertion
+Command to convert PDF to PNG if no PNG was found.
+* `-density` - resolution of PDF->PNG convertion in DPI
 * `-limit thread` - number of threads to perform convertion in parallel
 
-Almost the same for `COMPARE_CMD`. Other settings are self-describing.
+##### COMPARE_CMD
+```
+COMPARE_CMD = ["compare", "-limit", "thread", "2"]
+```
+Command to compare 2 PNG files.
+* `-limit thread` - number of threads to compare in parallel
+
+##### LOCALE
+Is not used anymore
+
+Other settings are self-describing.
 
 ## Usage
 ```
