@@ -17,6 +17,8 @@ CONVERT_CMD = ["convert", "-density", "170", "-limit", "thread", "2"]
 * `-density` - resolution of PDF->PNG convertion
 * `-limit thread` - number of threads to perform convertion in parallel
 
+Almost the same for `COMPARE_CMD`. Other settings are self-describing.
+
 ## Usage
 ```
 usage: python picomparator.py [-h] beforedir afterdir reportfile
