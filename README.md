@@ -1,8 +1,25 @@
 # picomparator
 Image comparer and browser
 
+## Installation
+1. Install [Python 2.7](https://www.python.org/downloads/release/python-2711/)
+2. Install [wxPython](http://www.wxpython.org/download.php#msw). The arch of the library must be the same as Python's one.
+3. Install [GhostScript](https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs919/gs919w32.exe). It will be required by _ImageMagick_
+4. Install [ImageMagick](http://www.imagemagick.org/download/binaries/ImageMagick-7.0.1-3-Q8-x64-dll.exe), allow the installer to modify `PATH` variable, so you do not need to add paths later.
+
+## Setup
+Copy `settings.py.win`/`settings.py.linux` to `settings.py`
 ```
-usage: picomparator.py [-h] beforedir afterdir reportfile
+CONVERT_CMD = ["convert", "-density", "170", "-limit", "thread", "2"]
+                ^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                command           command-line params
+```
+* `-density` - resolution of PDF->PNG convertion
+* `-limit thread` - number of threads to perform convertion in parallel
+
+## Usage
+```
+usage: python picomparator.py [-h] beforedir afterdir reportfile
 
 Compares images in 2 directories and browses them
 
@@ -15,7 +32,7 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 ```
-`reportfile` parameter should contain filenames related to `afterdir/convertedPdfFiles` or `beforedir/convertedPdfFile`, so please set the parameters correctly, for example like this:
+`reportfile` should contain filenames related to `<afterdir>/convertedPdfFiles` or `<beforedir>/convertedPdfFile`, so please set the parameters correctly, for example like this:
 ```
-./picomparator 10.0.0.0001 10.0.0.0002 differences.csv
+python picomparator 10.0.0.0001 10.0.0.0002 differences.csv
 ```
