@@ -73,7 +73,7 @@ def csvLineFromDocPage(docPage):
     """
     line = ';'.join([docPage.originalName, locale.str(docPage.difference), docPage.status if docPage.status is not None else ""
                         , docPage.comment if docPage.comment is not None else ""]) + "\n"
-    return line
+    return line.encode("utf-8")
 
 
 def signal_handler(signal, frame):

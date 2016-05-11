@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import operator
 import wx
 from imageviewer import ImagePanel
 from functools import partial
@@ -7,6 +8,7 @@ from docpage import DocPage
 import wx.lib.newevent
 
 RequestNextEvent, EVT_REQUEST_NEXT = wx.lib.newevent.NewEvent()
+DocPageChangedEvent, EVT_DOCPAGE_CHANGED = wx.lib.newevent.NewEvent()
 
 class DiffViewer(wx.Frame):
     def __init__(self, parent, title):
@@ -63,7 +65,7 @@ class DiffViewer(wx.Frame):
 
         self.CreateStatusBar(1)
 
-    def load(self, doc):
+    def load(self, doc, commentsIndex):
         """
         :type doc: DocPage
         :return:
@@ -74,6 +76,11 @@ class DiffViewer(wx.Frame):
         self.diffview.load(doc.imgDiffFilename())
         self.setScale(0.5)
         self.SetStatusText(doc.key)
+        if len(commentsIndex.items()) > 0:
+            kl = list(zip(*sorted(commentsIndex.items(), key=operator.itemgetter(1)))[0])
+            kl.reverse()
+            self.commentCb.Clear()
+            self.commentCb.AppendItems(kl)
         self.onReset(None)
         self.Show(True)
         self.Refresh()
@@ -93,7 +100,10 @@ class DiffViewer(wx.Frame):
         self.lastComment = self.commentCb.GetValue()
         self.lastStatus = self.statusCb.GetValue()
         self.doc.update(self.lastStatus, self.lastComment)
-        self.GetParent().Refresh()
+
+        evt = DocPageChangedEvent()
+        wx.PostEvent(self, evt)
+
         evt = RequestNextEvent()
         wx.PostEvent(self, evt)
 

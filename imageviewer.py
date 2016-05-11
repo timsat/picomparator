@@ -20,7 +20,7 @@ class ImagePanel(wx.Panel):
         self.doc_scaled_bm = None
         """@type : wx.Bitmap"""
         self.mdc = None
-        """@type : wx.MemoryDC"""
+        """@type : wx.GCDC"""
         self.scale = -1.0
         self.label = label
         self.offset = wx.Point()
@@ -46,7 +46,7 @@ class ImagePanel(wx.Panel):
         img =self.doc_img.Copy()
         """@type : wx.Image"""
         sw, sh = int(bw * self.scale), int(bh * self.scale)
-        img.Rescale(sw, sh)
+        img.Rescale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
         self.doc_scaled_bm = wx.EmptyBitmap(sw, sh)
         doc_scaled_bm = wx.BitmapFromImage(img, 32) if img.HasAlpha() else wx.BitmapFromImage(img)
         self.mdc = wx.MemoryDC(self.doc_scaled_bm)
@@ -112,7 +112,7 @@ class ImagePanel(wx.Panel):
             self.Refresh()
 
     def onPaint(self, event):
-        dc = wx.PaintDC(self)
+        dc = wx.GCDC(wx.PaintDC(self))
         mdc = self.mdc
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
@@ -122,7 +122,7 @@ class ImagePanel(wx.Panel):
         dc.DrawRectangle(0, 0, w, h)
         lx, ly = ImagePanel.__labelPos
         lw, lh = dc.GetTextExtent(self.label)
-        dc.SetBrush(wx.Brush(wx.Colour(255, 155, 155, 200)))
+        dc.SetBrush(wx.Brush(wx.Colour(255, 195, 195, 170)))
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.DrawRectangle(lx, ly, lw+2, lh+2)
         dc.DrawText(self.label, lx+1, ly+1)

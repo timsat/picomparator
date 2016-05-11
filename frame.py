@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import wx
-from diffviewer import DiffViewer, EVT_REQUEST_NEXT
+from diffviewer import DiffViewer, EVT_REQUEST_NEXT, EVT_DOCPAGE_CHANGED
 from docpage import DocPage
 from doclist import DocListBox
 from pprint import pprint
-from docpageeditdialog import DocPageEditDialog
 
 _KC_i = 73
 _KC_j = 74
@@ -17,11 +16,14 @@ class MyFrame(wx.Frame):
         self.InitUI(docs)
         self.Show(True)
         self.isEditing = False
+        self.commentsIndex = {}
+        self.updateCommentsIndex()
 
     def InitUI(self, docs):
         vbox = wx.BoxSizer(wx.VERTICAL)
         self.diffviewer = DiffViewer(self, "diffViewer")
         self.diffviewer.Bind(EVT_REQUEST_NEXT, self.onRequestNext)
+        self.diffviewer.Bind(EVT_DOCPAGE_CHANGED, self.onDocPageChanged)
         self.filelist = DocListBox(self, docs)
         self.filelist.Bind(wx.EVT_LISTBOX_DCLICK, self.onItemClicked)
         self.filelist.Bind(wx.EVT_LISTBOX, self.onItemSelected)
@@ -29,10 +31,21 @@ class MyFrame(wx.Frame):
         self.SetSizer(vbox)
         self.CreateStatusBar(3)
         self.SetStatusWidths([55, 350, 70])
-        self.docPageEditor = DocPageEditDialog(self, -1, "some title", {})
 
     def onItemClicked(self, event):
         self.show(self.filelist.GetItem(event.GetSelection()))
+
+    def onDocPageChanged(self, event):
+        self.updateCommentsIndex()
+
+    def updateCommentsIndex(self):
+        self.commentsIndex.clear()
+        for docPage in self.filelist.docs:
+            if docPage.hasComment():
+                if docPage.comment in self.commentsIndex.keys():
+                    self.commentsIndex[docPage.comment] += 1
+                else:
+                    self.commentsIndex[docPage.comment] = 1
 
     def show(self, doc):
         """
@@ -40,7 +53,7 @@ class MyFrame(wx.Frame):
         :return:
         """
         if doc.ensureCompared():
-            self.diffviewer.load(doc)
+            self.diffviewer.load(doc, self.commentsIndex)
 
     def onItemSelected(self, event):
         doc = self.filelist.GetItem(event.GetSelection())
@@ -58,6 +71,7 @@ class MyFrame(wx.Frame):
         print(event.GetKeyCode())
         if not self.IsActive():
             self.diffviewer.onKeyUp(event)
+            return
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER, _KC_i]:
             self.show(self.filelist.GetItem(self.filelist.GetSelection()))
         elif event.GetKeyCode() == wx.WXK_ESCAPE:
