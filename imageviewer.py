@@ -121,6 +121,7 @@ class ImagePanel(wx.Panel):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
         dc.DrawRectangle(0, 0, w, h)
+        dc.DrawRectangle(w/2 - 20, h/2 - 20, 40, 40)
         lx, ly = ImagePanel.__labelPos
         lw, lh = dc.GetTextExtent(self.label)
         dc.SetBrush(wx.Brush(wx.Colour(255, 195, 195, 170)))
