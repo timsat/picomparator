@@ -13,14 +13,12 @@ def mul(point, mult):
 class ImagePanel(wx.Panel):
     __labelPos = (10, 10)
 
-    def __init__(self, parent, label):
+    def __init__(self, parent, label, prefetcher):
         wx.Panel.__init__(self, parent)
-        self.doc_img = None
-        """@type : wx.Image"""
+        self._scaled_bitmaps = None
+        self._prefetcher = prefetcher
         self.doc_scaled_bm = None
         """@type : wx.Bitmap"""
-        self.mdc = None
-        """@type : wx.GCDC"""
         self.scale = -1.0
         self.label = label
         self.offset = wx.Point()
@@ -35,28 +33,13 @@ class ImagePanel(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
 
     def load(self, filename):
-        self.doc_img = wx.Image(filename, wx.BITMAP_TYPE_PNG)
+        self._scaled_bitmaps = self._prefetcher.get(filename, filename)
         self.offset = wx.Point()
-        if self.scale < 0:
-            self.setScale(1)
 
     def setScale(self, scale):
         self.scale = float(scale)
-        bw, bh = self.doc_img.GetSize()
-        img =self.doc_img.Copy()
         """@type : wx.Image"""
-        sw, sh = int(bw * self.scale), int(bh * self.scale)
-        img.Rescale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
-        self.doc_scaled_bm = wx.EmptyBitmap(sw, sh)
-        doc_scaled_bm = wx.BitmapFromImage(img, 32) if img.HasAlpha() else wx.BitmapFromImage(img)
-        self.mdc = wx.MemoryDC(self.doc_scaled_bm)
-        if img.HasAlpha():
-            self.mdc.SetPen(wx.TRANSPARENT_PEN)
-            self.mdc.SetBrush(wx.WHITE_BRUSH)
-            self.mdc.DrawRectangle(0, 0, sw, sh)
-
-        self.mdc.DrawBitmap(doc_scaled_bm, 0, 0, img.HasAlpha())
-
+        self.doc_scaled_bm = self._scaled_bitmaps[int(self.scale * 100)]
         self.Refresh()
 
     def translate(self, point):
@@ -71,7 +54,7 @@ class ImagePanel(wx.Panel):
 
     def getPaintParams(self):
         w, h = self.GetClientSize()
-        sw, sh = self.mdc.GetSize()
+        # sw, sh = self.mdc.GetSize()
 
         dx, dy = self.offset.Get()
         ddx, ddy = 0, 0
@@ -113,11 +96,15 @@ class ImagePanel(wx.Panel):
 
     def onPaint(self, event):
         dc = wx.BufferedPaintDC(self)
-        mdc = self.mdc
+        mdc = wx.MemoryDC(self.doc_scaled_bm)
         dc.SetBackground(wx.Brush(wx.Colour(127, 127, 127)))
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
-        dc.Blit(ddx, ddy, w, h, mdc, dx, dy)
+        if self.doc_scaled_bm.HasAlpha():
+            dc.SetBrush(wx.WHITE_BRUSH)
+            dc.SetPen(wx.TRANSPARENT_PEN)
+            dc.DrawRectangle(ddx, ddy, w, h)
+        dc.Blit(ddx, ddy, w, h, mdc, dx, dy, useMask=self.doc_scaled_bm.HasAlpha())
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
         dc.DrawRectangle(0, 0, w, h)

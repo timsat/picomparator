@@ -11,13 +11,13 @@ RequestNextEvent, EVT_REQUEST_NEXT = wx.lib.newevent.NewEvent()
 DocPageChangedEvent, EVT_DOCPAGE_CHANGED = wx.lib.newevent.NewEvent()
 
 class DiffViewer(wx.Frame):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, prefetcher):
         wx.Frame.__init__(self, parent, title=title)
-        self.afterview = ImagePanel(self, "After")
+        self.afterview = ImagePanel(self, "After", prefetcher)
         self.afterview.centerPointMovedHandler = partial(self._onAfterViewCenterPointMoved, self)
-        self.beforeview = ImagePanel(self, "Before")
+        self.beforeview = ImagePanel(self, "Before", prefetcher)
         self.beforeview.centerPointMovedHandler = partial(self._onBeforeViewCenterPointMoved, self)
-        self.diffview = ImagePanel(self, "Difference")
+        self.diffview = ImagePanel(self, "Difference", prefetcher)
         self.diffview.centerPointMovedHandler = partial(self._onDiffViewCenterPointMoved, self)
         self.scale = 0.5
         self.doc = None

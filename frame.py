@@ -4,24 +4,47 @@ import wx
 from diffviewer import DiffViewer, EVT_REQUEST_NEXT, EVT_DOCPAGE_CHANGED
 from docpage import DocPage
 from doclist import DocListBox
+from prefetcher import Prefetcher
+from PIL import Image
 from pprint import pprint
+import cProfile
+from settings import PREFETCH_COUNT
 
 _KC_i = 73
 _KC_j = 74
 _KC_k = 75
 
+
+def _loadimg(filename):
+    scales = [66, 50, 33, 22]
+    result = {}
+    img = wx.Image(filename)
+    w, h = img.GetSize()
+    result[100] = wx.BitmapFromBuffer(w, h, img.GetData())
+    for scale in scales:
+        """@type : wx.Image"""
+        sw, sh = int(w * scale * 0.01), int(h * scale * 0.01)
+        img.Rescale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
+
+        result[scale] = wx.BitmapFromBuffer(sw, sh, img.GetData())
+
+    return result
+
+
 class MyFrame(wx.Frame):
     def __init__(self, parent, title, docs):
         wx.Frame.__init__(self, parent, title=title)
+        self._prefetcher = Prefetcher(_loadimg, 0.5, PREFETCH_COUNT * 3 + 3)
         self.InitUI(docs)
         self.Show(True)
         self.isEditing = False
         self.commentsIndex = {}
         self.updateCommentsIndex()
+        self.prof = cProfile.Profile()
 
     def InitUI(self, docs):
         vbox = wx.BoxSizer(wx.VERTICAL)
-        self.diffviewer = DiffViewer(self, "diffViewer")
+        self.diffviewer = DiffViewer(self, "diffViewer", self._prefetcher)
         self.diffviewer.Bind(EVT_REQUEST_NEXT, self.onRequestNext)
         self.diffviewer.Bind(EVT_DOCPAGE_CHANGED, self.onDocPageChanged)
         self.filelist = DocListBox(self, docs)
@@ -33,7 +56,7 @@ class MyFrame(wx.Frame):
         self.SetStatusWidths([55, 350, 70])
 
     def onItemClicked(self, event):
-        self.show(self.filelist.GetItem(event.GetSelection()))
+        self.show(event.GetSelection())
 
     def onDocPageChanged(self, event):
         self.updateCommentsIndex()
@@ -47,13 +70,27 @@ class MyFrame(wx.Frame):
                 else:
                     self.commentsIndex[docPage.comment] = 1
 
-    def show(self, doc):
+    def show(self, idx):
         """
-        :type doc: DocPage
+        :type idx: DocPage
         :return:
         """
+        doc = self.filelist.GetItem(idx)
         if doc.ensureCompared():
-            self.diffviewer.load(doc, self.commentsIndex)
+            self.prof.runcall(self.diffviewer.load, doc, self.commentsIndex)
+            self.prof.print_stats()
+        for i in xrange(idx + 1, idx + PREFETCH_COUNT + 1):
+            if i >= self.filelist.GetItemCount():
+                break
+            doc = self.filelist.GetItem(i)
+            """
+            @type: DocPage
+            """
+            if doc.ensureCompared():
+                self._prefetcher.add(doc.imgBeforeFilename(), doc.imgBeforeFilename())
+                self._prefetcher.add(doc.imgAfterFilename(), doc.imgAfterFilename())
+                self._prefetcher.add(doc.imgDiffFilename(), doc.imgDiffFilename())
+
 
     def onItemSelected(self, event):
         doc = self.filelist.GetItem(event.GetSelection())
@@ -73,7 +110,7 @@ class MyFrame(wx.Frame):
             self.diffviewer.onKeyUp(event)
             return
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER, _KC_i]:
-            self.show(self.filelist.GetItem(self.filelist.GetSelection()))
+            self.show(self.filelist.GetSelection())
         elif event.GetKeyCode() == wx.WXK_ESCAPE:
             pass
         elif event.GetKeyCode() == _KC_j:
@@ -98,7 +135,7 @@ class MyFrame(wx.Frame):
 
     def onRequestNext(self, evt):
         self.gotoNext()
-        self.show(self.filelist.GetItem(self.filelist.GetSelection()))
+        self.show(self.filelist.GetSelection())
 
     def RefreshDocList(self):
         self.filelist.Refresh()

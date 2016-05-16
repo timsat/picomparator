@@ -5,3 +5,4 @@ COMPARE_CMD = ["compare", "-limit", "thread", "2"]
 LOCALE = "ru_RU"
 FILENAME_FONT = "Liberation Mono"
 COMMENT_FONT = "Liberation Sans"
+PREFETCH_COUNT = 3
