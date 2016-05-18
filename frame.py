@@ -16,19 +16,8 @@ _KC_k = 75
 
 
 def _loadimg(filename):
-    scales = [66, 50, 33, 22]
-    result = {}
     img = wx.Image(filename)
-    w, h = img.GetSize()
-    result[100] = wx.BitmapFromBuffer(w, h, img.GetData())
-    for scale in scales:
-        """@type : wx.Image"""
-        sw, sh = int(w * scale * 0.01), int(h * scale * 0.01)
-        img.Rescale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
-
-        result[scale] = wx.BitmapFromBuffer(sw, sh, img.GetData())
-
-    return result
+    return img
 
 
 class MyFrame(wx.Frame):
@@ -41,6 +30,9 @@ class MyFrame(wx.Frame):
         self.commentsIndex = {}
         self.updateCommentsIndex()
         self.prof = cProfile.Profile()
+
+    def __del__(self):
+        self._prefetcher.close()
 
     def InitUI(self, docs):
         vbox = wx.BoxSizer(wx.VERTICAL)

@@ -18,6 +18,10 @@ class Prefetcher:
         self._sleeptime = sleeptime
         self._thread.start()
 
+    def close(self):
+        self._isStopped = True
+        self._thread.join(2)
+
     def add(self, key, *args):
         with self._queueLock:
             self._queue.appendleft((key, args))

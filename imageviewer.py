@@ -15,9 +15,10 @@ class ImagePanel(wx.Panel):
 
     def __init__(self, parent, label, prefetcher):
         wx.Panel.__init__(self, parent)
-        self._scaled_bitmaps = None
+        self._doc_img = None
+        """@type : wx.Image"""
         self._prefetcher = prefetcher
-        self.doc_scaled_bm = None
+        self._doc_scaled_bm = None
         """@type : wx.Bitmap"""
         self.scale = -1.0
         self.label = label
@@ -33,13 +34,17 @@ class ImagePanel(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
 
     def load(self, filename):
-        self._scaled_bitmaps = self._prefetcher.get(filename, filename)
+        self._doc_img = self._prefetcher.get(filename, filename)
         self.offset = wx.Point()
 
     def setScale(self, scale):
         self.scale = float(scale)
-        """@type : wx.Image"""
-        self.doc_scaled_bm = self._scaled_bitmaps[int(self.scale * 100)]
+        w, h = self._doc_img.GetSize()
+        sw, sh = (int(w * self.scale), int(h * self.scale))
+        scaled_img = self._doc_img.Scale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
+
+        self._doc_scaled_bm = scaled_img.ConvertToBitmap()
+
         self.Refresh()
 
     def translate(self, point):
@@ -96,15 +101,15 @@ class ImagePanel(wx.Panel):
 
     def onPaint(self, event):
         dc = wx.BufferedPaintDC(self)
-        mdc = wx.MemoryDC(self.doc_scaled_bm)
+        mdc = wx.MemoryDC(self._doc_scaled_bm)
         dc.SetBackground(wx.Brush(wx.Colour(127, 127, 127)))
         dc.Clear()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
-        if self.doc_scaled_bm.HasAlpha():
+        if self._doc_scaled_bm.HasAlpha():
             dc.SetBrush(wx.WHITE_BRUSH)
             dc.SetPen(wx.TRANSPARENT_PEN)
             dc.DrawRectangle(ddx, ddy, w, h)
-        dc.Blit(ddx, ddy, w, h, mdc, dx, dy, useMask=self.doc_scaled_bm.HasAlpha())
+        dc.Blit(ddx, ddy, w, h, mdc, dx, dy, useMask=self._doc_scaled_bm.HasAlpha())
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
         dc.DrawRectangle(0, 0, w, h)

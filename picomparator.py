@@ -117,5 +117,7 @@ if len(pages) > 0:
     app.Bind(wx.EVT_KEY_DOWN, frame.onKeyDown)
     app.MainLoop()
 
+
     with open(args.reportfile, 'w') as f:
         f.writelines(map(csvLineFromDocPage, pages))
+

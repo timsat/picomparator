@@ -74,7 +74,7 @@ class DiffViewer(wx.Frame):
         self.afterview.load(doc.imgAfterFilename())
         self.beforeview.load(doc.imgBeforeFilename())
         self.diffview.load(doc.imgDiffFilename())
-        self.setScale(0.5)
+        self.setScale(0.3)
         self.SetStatusText(doc.key)
         if len(commentsIndex.items()) > 0:
             kl = list(zip(*sorted(commentsIndex.items(), key=operator.itemgetter(1)))[0])
