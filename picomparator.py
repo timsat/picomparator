@@ -82,42 +82,43 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 
-parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
-parser.add_argument("beforedir", help="path to the images before the tested change")
-parser.add_argument("afterdir", help="path to the images after the tested change")
-parser.add_argument("reportfile", help="file with filenames and differences in CSV format e.g. differences.csv")
-args = parser.parse_args()
+if __name__ == '__main__':
 
-locale.setlocale(locale.LC_NUMERIC, LOCALE)
+    parser = argparse.ArgumentParser(description="Compares images in 2 directories and browses them")
+    parser.add_argument("beforedir", help="path to the images before the tested change")
+    parser.add_argument("afterdir", help="path to the images after the tested change")
+    parser.add_argument("reportfile", help="file with filenames and differences in CSV format e.g. differences.csv")
+    args = parser.parse_args()
 
-DocPage.initDirs(args.afterdir, args.beforedir, "_picache")
+    locale.setlocale(locale.LC_NUMERIC, LOCALE)
 
-convertQueue = Queue.Queue()
+    DocPage.initDirs(args.afterdir, args.beforedir, "_picache")
 
-signal.signal(signal.SIGINT, signal_handler)
+    convertQueue = Queue.Queue()
 
-pages = None
-with open(args.reportfile, 'r') as f:
-    pages = map(docPageFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
+    signal.signal(signal.SIGINT, signal_handler)
 
-for doc in pages:
-    if not doc.isCompared():
-        convertQueue.put(Task(doc))
+    pages = None
+    with open(args.reportfile, 'r') as f:
+        pages = map(docPageFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
-if len(pages) > 0:
-    app = wx.App(False)
-    frame = MyFrame(None, "Files", pages)
-    if not os.path.exists(DocPage.cacheDir):
-        os.makedirs(DocPage.cacheDir)
-    t = Thread(target=worker, args=(frame, ))
-    t.daemon = True
-    t.start()
+    for doc in pages:
+        if not doc.isCompared():
+            convertQueue.put(Task(doc))
 
-    print("Starting image browser")
-    app.Bind(wx.EVT_KEY_DOWN, frame.onKeyDown)
-    app.MainLoop()
+    if len(pages) > 0:
+        app = wx.App(False)
+        frame = MyFrame(None, "Files", pages)
+        if not os.path.exists(DocPage.cacheDir):
+            os.makedirs(DocPage.cacheDir)
+        t = Thread(target=worker, args=(frame, ))
+        t.daemon = True
+        t.start()
 
+        print("Starting image browser")
+        app.Bind(wx.EVT_KEY_DOWN, frame.onKeyDown)
+        app.MainLoop()
 
-    with open(args.reportfile, 'w') as f:
-        f.writelines(map(csvLineFromDocPage, pages))
+        with open(args.reportfile, 'w') as f:
+            f.writelines(map(csvLineFromDocPage, pages))
 
