@@ -5,8 +5,6 @@ from diffviewer import DiffViewer, EVT_REQUEST_NEXT, EVT_DOCPAGE_CHANGED
 from docpage import DocPage
 from doclist import DocListBox
 from prefetcher import Prefetcher
-from PIL import Image
-from pprint import pprint
 import cProfile
 from settings import PREFETCH_COUNT
 
@@ -69,8 +67,9 @@ class MyFrame(wx.Frame):
         """
         doc = self.filelist.GetItem(idx)
         if doc.ensureCompared():
-            self.prof.runcall(self.diffviewer.load, doc, self.commentsIndex)
-            self.prof.print_stats()
+            self.diffviewer.load(doc, self.commentsIndex)
+            # self.prof.runcall(self.diffviewer.load, doc, self.commentsIndex)
+            # self.prof.print_stats()
         for i in xrange(idx + 1, idx + PREFETCH_COUNT + 1):
             if i >= self.filelist.GetItemCount():
                 break
@@ -97,7 +96,7 @@ class MyFrame(wx.Frame):
         """
         :type event: wx.KeyEvent
         """
-        print(event.GetKeyCode())
+        # print(event.GetKeyCode())
         if not self.IsActive():
             self.diffviewer.onKeyUp(event)
             return

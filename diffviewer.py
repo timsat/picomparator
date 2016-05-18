@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import operator
 import wx
-from imageviewer import ImagePanel
+from imageviewer import ImagePanel, EVT_CENTER_POINT_MOVED
 from functools import partial
 from docpage import DocPage
 
@@ -10,16 +10,17 @@ import wx.lib.newevent
 RequestNextEvent, EVT_REQUEST_NEXT = wx.lib.newevent.NewEvent()
 DocPageChangedEvent, EVT_DOCPAGE_CHANGED = wx.lib.newevent.NewEvent()
 
+
 class DiffViewer(wx.Frame):
     def __init__(self, parent, title, prefetcher):
         wx.Frame.__init__(self, parent, title=title)
         self.afterview = ImagePanel(self, "After", prefetcher)
-        self.afterview.centerPointMovedHandler = partial(self._onAfterViewCenterPointMoved, self)
+        self.afterview.Bind(EVT_CENTER_POINT_MOVED, self._onAfterViewCenterPointMoved)
         self.beforeview = ImagePanel(self, "Before", prefetcher)
-        self.beforeview.centerPointMovedHandler = partial(self._onBeforeViewCenterPointMoved, self)
+        self.beforeview.Bind(EVT_CENTER_POINT_MOVED, self._onBeforeViewCenterPointMoved)
         self.diffview = ImagePanel(self, "Difference", prefetcher)
-        self.diffview.centerPointMovedHandler = partial(self._onDiffViewCenterPointMoved, self)
-        self.scale = 0.5
+        self.diffview.Bind(EVT_CENTER_POINT_MOVED, self._onDiffViewCenterPointMoved)
+        self.scale = 0.3
         self.doc = None
         """
         @type: DocPage
@@ -123,17 +124,14 @@ class DiffViewer(wx.Frame):
         self.afterview.setScale(scale)
         self.beforeview.setScale(scale)
 
-    @staticmethod
-    def _onDiffViewCenterPointMoved(self, point):
-        self.afterview.moveCenterPoint(point)
-        self.beforeview.moveCenterPoint(point)
+    def _onDiffViewCenterPointMoved(self, e):
+        self.afterview.moveNormCenterPoint(e.newPoint)
+        self.beforeview.moveNormCenterPoint(e.newPoint)
 
-    @staticmethod
-    def _onBeforeViewCenterPointMoved(self, point):
-        self.afterview.moveCenterPoint(point)
-        self.diffview.moveCenterPoint(point)
+    def _onBeforeViewCenterPointMoved(self, e):
+        self.afterview.moveNormCenterPoint(e.newPoint)
+        self.diffview.moveNormCenterPoint(e.newPoint)
 
-    @staticmethod
-    def _onAfterViewCenterPointMoved(self, point):
-        self.diffview.moveCenterPoint(point)
-        self.beforeview.moveCenterPoint(point)
+    def _onAfterViewCenterPointMoved(self, e):
+        self.diffview.moveNormCenterPoint(e.newPoint)
+        self.beforeview.moveNormCenterPoint(e.newPoint)

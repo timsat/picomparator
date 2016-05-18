@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 import wx
+import wx.lib.newevent
 
 
-def div(point, divider):
+def _div(point, divider):
     return wx.Point(round(point.x / divider), round(point.y / divider))
 
 
-def mul(point, mult):
+def _mul(point, mult):
     return wx.Point(round(point.x * mult), round(point.y * mult))
+
+
+CenterPointMovedEvent, EVT_CENTER_POINT_MOVED = wx.lib.newevent.NewEvent()
 
 
 class ImagePanel(wx.Panel):
@@ -38,14 +42,14 @@ class ImagePanel(wx.Panel):
         self.offset = wx.Point()
 
     def setScale(self, scale):
+        normCenter = self.calcNormCenterPoint()
         self.scale = float(scale)
         w, h = self._doc_img.GetSize()
         sw, sh = (int(w * self.scale), int(h * self.scale))
         scaled_img = self._doc_img.Scale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
 
         self._doc_scaled_bm = scaled_img.ConvertToBitmap()
-
-        self.Refresh()
+        self.moveNormCenterPoint(normCenter)
 
     def translate(self, point):
         """
@@ -73,12 +77,20 @@ class ImagePanel(wx.Panel):
             # h = sh
         return dx, dy, ddx, ddy, w, h
 
-    def moveCenterPoint(self, point):
+    def calcNormCenterPoint(self):
+        cw, ch = self.GetClientSize()
+        dx, dy, ddx, ddy, w, h = self.getPaintParams()
+        so = wx.Point(dx, dy)
+        do = wx.Point(ddx, ddy)
+        center = wx.Point(cw/2, ch/2)
+        return _div(so + center - do, self.scale)
+
+    def moveNormCenterPoint(self, point):
         cw, ch = self.GetClientSize()
         dx, dy, ddx, ddy, w, h = self.getPaintParams()
         do = wx.Point(ddx, ddy)
         center = wx.Point(cw/2, ch/2)
-        self.offset = mul(point, self.scale) - center + do
+        self.offset = _mul(point, self.scale) - center + do
         self.Refresh()
 
     def onMousedown(self, event):
@@ -86,13 +98,9 @@ class ImagePanel(wx.Panel):
 
     def onMouseup(self, event):
         self.startPos = None
-        if self.centerPointMovedHandler is not None:
-            cw, ch = self.GetClientSize()
-            dx, dy, ddx, ddy, w, h = self.getPaintParams()
-            so = wx.Point(dx, dy)
-            do = wx.Point(ddx, ddy)
-            center = wx.Point(cw/2, ch/2)
-            self.centerPointMovedHandler(div(so + center - do, self.scale))
+        evt = CenterPointMovedEvent()
+        evt.newPoint = self.calcNormCenterPoint()
+        wx.PostEvent(self, evt)
 
     def onMousemove(self, event):
         if self.startPos is not None:
