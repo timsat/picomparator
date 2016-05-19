@@ -108,7 +108,7 @@ class ImagePanel(wx.Panel):
             self.Refresh()
 
     def onPaint(self, event):
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.PaintDC(self)
         mdc = wx.MemoryDC(self._doc_scaled_bm)
         dc.SetBackground(wx.Brush(wx.Colour(127, 127, 127)))
         dc.Clear()
