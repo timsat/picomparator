@@ -91,6 +91,11 @@ class DiffViewer(wx.Frame):
             self.setScale(self.scale + 0.1)
         elif event.GetKeyCode() in [wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:
             self.setScale(self.scale - 0.1)
+        elif event.GetKeyCode() in [wx.WXK_MULTIPLY, wx.WXK_NUMPAD_MULTIPLY]:
+            drawAim = not self.afterview.drawAim
+            self.afterview.drawAim = drawAim
+            self.beforeview.drawAim = drawAim
+            self.diffview.drawAim = drawAim
         else:
             event.Skip()
 

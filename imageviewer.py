@@ -31,6 +31,7 @@ class ImagePanel(wx.Panel):
         self.Bind(wx.EVT_MOTION, self.onMousemove)
         self.Bind(wx.EVT_LEFT_DOWN, self.onMousedown)
         self.Bind(wx.EVT_LEFT_UP, self.onMouseup)
+        self.drawAim = True
 
         self.centerPointMovedHandler = None
         self.startPos = None
@@ -46,7 +47,8 @@ class ImagePanel(wx.Panel):
         self.scale = float(scale)
         w, h = self._doc_img.GetSize()
         sw, sh = (int(w * self.scale), int(h * self.scale))
-        scaled_img = self._doc_img.Scale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
+        #scaled_img = self._doc_img.Scale(sw, sh, wx.IMAGE_QUALITY_BILINEAR)
+        scaled_img = self._doc_img.Scale(sw, sh, wx.IMAGE_QUALITY_BICUBIC)
 
         self._doc_scaled_bm = scaled_img.ConvertToBitmap()
         self.moveNormCenterPoint(normCenter)
@@ -108,7 +110,7 @@ class ImagePanel(wx.Panel):
             self.Refresh()
 
     def onPaint(self, event):
-        dc = wx.BufferedPaintDC(self)
+        dc = wx.GCDC(self)
         mdc = wx.MemoryDC(self._doc_scaled_bm)
         dc.SetBackground(wx.Brush(wx.Colour(127, 127, 127)))
         dc.Clear()
@@ -121,7 +123,8 @@ class ImagePanel(wx.Panel):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetPen(wx.Pen(wx.Colour(250, 0, 0), 1))
         dc.DrawRectangle(0, 0, w, h)
-        dc.DrawRectangle(w/2 - 20, h/2 - 20, 40, 40)
+        if self.drawAim:
+            dc.DrawRectangle(w/2 - 20, h/2 - 20, 40, 40)
         lx, ly = ImagePanel.__labelPos
         lw, lh = dc.GetTextExtent(self.label)
         dc.SetBrush(wx.Brush(wx.Colour(255, 195, 195, 170)))

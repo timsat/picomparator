@@ -102,6 +102,8 @@ if __name__ == '__main__':
     with open(args.reportfile, 'r') as f:
         pages = map(docPageFromCsvLine, filter(lambda x: len(x.strip('\n\t ')) > 0, list(f)))
 
+    pages.sort(key=lambda x: x.key)
+
     for doc in pages:
         if not doc.isCompared():
             convertQueue.put(Task(doc))
