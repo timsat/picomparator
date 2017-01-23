@@ -56,7 +56,8 @@ def worker(frame):
 def docPageFromCsvLine(line):
     fields = line.strip('\n ').split(';')
     key = fields[0].strip('\n ')[:-4]
-    diff = locale.atof(fields[1]) if len(fields) > 1 else 0.0
+    diff = fields[1] if len(fields) > 1 else None
+    #diff = locale.atof(fields[1]) if len(fields) > 1 else 0.0
     status = None
     comment = None
     if len(fields) > 2:
@@ -71,7 +72,7 @@ def csvLineFromDocPage(docPage):
     :type docPage: DocPage
     :return:
     """
-    line = ';'.join([docPage.originalName, locale.str(docPage.difference), docPage.status if docPage.status is not None else ""
+    line = ';'.join([docPage.originalName, docPage.difference, docPage.status if docPage.status is not None else ""
                         , docPage.comment if docPage.comment is not None else ""]) + "\n"
     return line.encode("utf-8")
 

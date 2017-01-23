@@ -87,17 +87,27 @@ class DiffViewer(wx.Frame):
         self.Refresh()
 
     def onKeyUp(self, event):
-        if event.GetKeyCode() in [wx.WXK_ADD, wx.WXK_NUMPAD_ADD]:
-            self.setScale(self.scale + 0.1)
-        elif event.GetKeyCode() in [wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:
-            self.setScale(self.scale - 0.1)
-        elif event.GetKeyCode() in [wx.WXK_MULTIPLY, wx.WXK_NUMPAD_MULTIPLY]:
-            drawAim = not self.afterview.drawAim
-            self.afterview.drawAim = drawAim
-            self.beforeview.drawAim = drawAim
-            self.diffview.drawAim = drawAim
+        if event.GetModifiers() == wx.MOD_ALT:
+            if event.GetKeyCode() == ord('1'):
+                self.onFillLast(event)
+            if event.GetKeyCode() == ord('2'):
+                self.onSave(event)
+            if event.GetKeyCode() == ord('3'):
+                self.onReset(event)
+            #else:
+                #event.Skip()
         else:
-            event.Skip()
+            if event.GetKeyCode() in [wx.WXK_ADD, wx.WXK_NUMPAD_ADD]:
+                self.setScale(self.scale + 0.1)
+            elif event.GetKeyCode() in [wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:
+                self.setScale(self.scale - 0.1)
+            elif event.GetKeyCode() in [wx.WXK_MULTIPLY, wx.WXK_NUMPAD_MULTIPLY]:
+                drawAim = not self.afterview.drawAim
+                self.afterview.drawAim = drawAim
+                self.beforeview.drawAim = drawAim
+                self.diffview.drawAim = drawAim
+            else:
+                event.Skip()
 
     def onClose(self, event):
         self.Show(False)
