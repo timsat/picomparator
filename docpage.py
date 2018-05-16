@@ -20,6 +20,7 @@ def _mkdir_p(path):
 
 
 def _ensureConverted(src, img):
+    print("ensure converted " + src + " to " + img)
     if not os.path.exists(img):
         imgpath = os.path.dirname(img)
         if not os.path.exists(imgpath):

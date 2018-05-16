@@ -97,6 +97,12 @@ class DiffViewer(wx.Frame):
             #else:
                 #event.Skip()
         else:
+            if event.GetKeyCode() == ord('1'):
+                self.statusCb.SetValue('no change')
+            if event.GetKeyCode() == ord('2'):
+                self.statusCb.SetValue('progress')
+            if event.GetKeyCode() == ord('3'):
+                self.statusCb.SetValue('regress')
             if event.GetKeyCode() in [wx.WXK_ADD, wx.WXK_NUMPAD_ADD]:
                 self.setScale(self.scale + 0.1)
             elif event.GetKeyCode() in [wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:
